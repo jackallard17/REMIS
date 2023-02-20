@@ -3,7 +3,18 @@
 #include <Wire.h>
 using namespace std;
 
-int LCD_SDA = 6;
+//Digital pins D2 - D7
+int ROT_CLK = 5;
+int ROT_DT = 6;
+int ROT_SW = 7;
+int STEPPER_DIR = 8;
+int STEPPER_STEP = 9;
+
+//Analog pins A4 - A7
+int LCD_SDA = 23;
+int LCD_SDL = 24;
+int TRIGGER = 25;
+int TOGGLE = 26;
 
 
 void setup() {
