@@ -41,10 +41,21 @@ void setup()
     lcd.setCursor(0, 12);
     drawMushrooms();
 
+    //inputs
+    pinMode(TRIGGER, INPUT);
+    pinMode(TOGGLE, INPUT);
+    pinMode(ROT_CLK, INPUT);
+    pinMode(ROT_DT, INPUT);
+    pinMode(ROT_SW, INPUT);
+
+    //outputs
+    pinMode(STEPPER_DIR, OUTPUT);
+    pinMode(STEPPER_STEP, OUTPUT);
 }
 
 void loop()
 {
+
 }
 
 void drawMushrooms(){
