@@ -95,7 +95,6 @@ void debugMode()
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("T:");
-    // lcd.print(digitalRead(TOGGLE));
     lcd.print(digitalRead(10));
     lcd.setCursor(9, 0);
     lcd.print("Tr:");
