@@ -6,24 +6,22 @@
 using namespace std;
 
 LiquidCrystal_I2C lcd(0x27, 2, 16);
-Encoder encoder(5,6);
+Encoder encoder(2,3);
 
 long prevPosition;
 
 // Digital pins D2 - D7
-#define ROT_CLK 5 // rotary encoder clock
-#define ROT_DT 6 // rotary encoder direction
-#define ROT_SW 7 // rotary encoder switch (press in)
-#define STEPPER_DIR 8
-#define STEPPER_STEP 9
+#define ROT_CLK 2 // rotary encoder clock
+#define ROT_DT 3 // rotary encoder direction
+#define ROT_SW 4 // rotary encoder switch (press in)
 
-// Analog pins A4 - A7. The LCD pins, (23 and 24) will be set to digital mode.
-// #define LCD_SDA 23
-// #define LCD_SDL 24
+#define STEPPER_DIR 5
+#define STEPPER_STEP 6
+
 #define LCD_SDA 22
 #define LCD_SDL 21
-#define TRIGGER 20
-#define TOGGLE 10
+#define TRIGGER 9
+#define TOGGLE 8
 
 //threshold voltages to parse analog signal
 int triggerThreshold;
@@ -36,7 +34,8 @@ uint8_t mushroom[8] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00100};
+    0b00100
+};
 
 void setup()
 {
@@ -69,23 +68,6 @@ void setup()
 void loop()
 {
   debugMode();
-
-  // long newPosition = encoder.read();
-
-  // if (newPosition != prevPosition)
-  // {
-  //   prevPosition= newPosition;
-  //   Serial.println(newPosition);
-  //   lcd.print(newPosition);
-  // }
-
-  // if (analogRead(TRIGGER) > 1000) 
-  // {
-  //   lcd.print("trigger pressed");
-  // } else 
-  // {
-  //   lcd.clear();
-  // }
 }
 
 void debugMode()
@@ -95,18 +77,20 @@ void debugMode()
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("T:");
-    lcd.print(digitalRead(10));
-    lcd.setCursor(9, 0);
+    lcd.print(digitalRead(TOGGLE));
+
+    lcd.setCursor(10, 0);
     lcd.print("Tr:");
-    lcd.print(analogRead(TRIGGER));
+    lcd.print(digitalRead(TRIGGER));
 
     lcd.setCursor(0, 1);
-    lcd.print("RC:");
-    lcd.print(digitalRead(ROT_CLK));
-    lcd.print(digitalRead(ROT_DT));
-    lcd.print(digitalRead(ROT_SW));
-    lcd.setCursor(9, 1);
-    lcd.print("RP:");
+    lcd.print("RC:"); //rotary code (raw binary)
+    lcd.print(digitalRead(ROT_CLK)); //clk
+    lcd.print(digitalRead(ROT_DT)); //dt
+    lcd.print(digitalRead(ROT_SW)); //sw
+
+    lcd.setCursor(10, 1);
+    lcd.print("RP:"); //rotary position (decoded)
     lcd.print(encoder.read());
 
     delay(100);
