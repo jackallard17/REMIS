@@ -42,14 +42,7 @@ void setup()
   lcd.backlight();
   lcd.createChar(0, mushroom);
   lcd.setCursor(0, 0);
-  lcd.print("REMIS       v0.0"); // if (digitalRead(TOGGLE) == LOW)
-                                 // { // Button is pressed
-                                 //   lcd.print('0');
-                                 // }
-                                 // else
-                                 // { // Button is not pressed
-                                 //   lcd.print('1');
-                                 // }
+  lcd.print("REMIS       v0.0");
   lcd.setCursor(0, 12);
   drawMushrooms();
 
