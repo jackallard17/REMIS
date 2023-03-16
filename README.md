@@ -6,6 +6,8 @@ Source code for the Remarkably Efficient Mass Inoculation System (REMIS) by Fung
 2. Install the dependencies
 3. Upload the sketch to the Arduino nano board, either using the Arduino IDE or the command line interface (CLI)
 
+## I/O
+
 This code is designed to run on an Arduino Nano board, connected to the following inputs:
 - **Rotary encoder** for navigating the device's UI
 - **Toggle switch** for using the pump's manual mode 
