@@ -32,8 +32,9 @@ uint8_t mushroom[8] = {
     0b00100};
 
 String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagnostics mode is hidden
-int menuItemIndex = 0;
+int mainIndex = 0;
 int prevIndex;
+bool submenuVisited = false;
 
 void setup()
 {
@@ -60,24 +61,38 @@ void setup()
   Serial.begin(9600);
 
   lcd.clear();
-  lcd.print(menuItems[menuItemIndex]);
+  lcd.print(menuItems[mainIndex]);
   prevIndex = (encoder.read() / 4) % 3; // store inital state of rotary encoder
 }
 
 void loop()
 {
-  int menuItemIndex = (encoder.read() / 4) % 3; // calculate the index
-
-  if (menuItemIndex < 0) // if the index is negative
+  if(submenuVisited)
   {
-    menuItemIndex += 3; // wrap around to the last item
+    lcd.print(menuItems[mainIndex]);
+    submenuVisited = false;
+  }
+
+  int mainIndex = (encoder.read() / 4) % 3; // calculate the index
+
+  if (mainIndex < 0) // if the index is negative
+  {
+    mainIndex += 3; // wrap around to the last item
+  }
+
+  if (mainIndex != prevIndex)
+  {
+    lcd.clear();
+    lcd.print(menuItems[mainIndex]);
+    prevIndex = mainIndex;
   }
 
   if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
   {
     lcd.clear();
+    submenuVisited = true;
     // enter the submenu for the current menu item
-    switch (menuItemIndex)
+    switch (mainIndex)
     {
     case 0:
       injectorModeMenu();
@@ -88,12 +103,6 @@ void loop()
     }
   }
 
-  if (menuItemIndex != prevIndex)
-  {
-    lcd.clear();
-    lcd.print(menuItems[menuItemIndex]);
-    prevIndex = menuItemIndex;
-  }
 }
 
 void debugMode()
@@ -128,22 +137,29 @@ void injectorModeMenu()
 {
   String menuItems[] = {"Toggle", "Continuous", "Dose Mode"};
   bool optionSelected = false;
-  lcd.print(menuItems[menuItemIndex]);
+  int index = 0;
+  lcd.print(menuItems[index]);
 
   while (!optionSelected)
   {
-    int menuItemIndex = (encoder.read() / 4) % 3; // calculate the index
+    int index = (encoder.read() / 4) % 3; // calculate the index
 
-    if (menuItemIndex < 0) // if the index is negative
+    if (index < 0) // if the index is negative
     {
-      menuItemIndex += 3; // wrap around to the last item
+      index += 3; // wrap around to the last item
+    }
+
+    if (index != prevIndex)
+    {
+      lcd.clear();
+      lcd.print(menuItems[index]);
+      prevIndex = index;
     }
 
     if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
     {
       optionSelected = true;
-      // enter the submenu for the current menu item
-      switch (menuItemIndex)
+      switch (index)
       {
       case 0:
         // set injectorMode variable to 0 (toggle mode)
@@ -154,13 +170,6 @@ void injectorModeMenu()
         // set injectorMode variable to 2 (volumetric mode)
         break;
       }
-    }
-
-    if (menuItemIndex != prevIndex)
-    {
-      lcd.clear();
-      lcd.print(menuItems[menuItemIndex]);
-      prevIndex = menuItemIndex;
     }
   }
 }
