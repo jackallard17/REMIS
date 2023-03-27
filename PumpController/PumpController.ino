@@ -105,6 +105,90 @@ void loop()
 
 }
 
+void injectorModeMenu()
+{
+  String injectorModeMenuItems[] = {"Toggle", "Continuous", "Dose Mode"};
+  bool optionSelected = false;
+  int index = 0;
+  lcd.print(injectorModeMenuItems[index]);
+
+  while (!optionSelected)
+  {
+    int index = (encoder.read() / 4) % 3; // calculate the index
+
+    if (index < 0) // if the index is negative
+    {
+      index += 3; // wrap around to the last item
+    }
+
+    if (index != prevIndex)
+    {
+      lcd.clear();
+      lcd.print(injectorModeMenuItems[index]);
+      prevIndex = index;
+    }
+
+    if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
+    {
+      optionSelected = true;
+      switch (index)
+      {
+      case 0:
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+      }
+    }
+  }
+}
+
+void flowRateMenu()
+{
+}
+
+void settingsMenu()
+{
+  String settingsMenuItems[] = {"Set Dose", "Calibrate"};
+  bool optionSelected = false;
+  int index = 0;
+  lcd.print(settingsMenuItems[index]);
+
+  while (!optionSelected)
+  {
+    int index = (encoder.read() / 4) % 2; // calculate the index
+
+    if (index < 0) // if the index is negative
+    {
+      index += 2; // wrap around to the last item
+    }
+
+    if (index != prevIndex)
+    {
+      lcd.clear();
+      lcd.print(settingsMenuItems[index]);
+      prevIndex = index;
+    }
+
+    if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
+    {
+      optionSelected = true;
+      switch (index)
+      {
+      case 0:
+        break;
+      case 1:
+        break;
+      }
+    }
+  }
+}
+
+void calibrate()
+{
+}
+
 void debugMode()
 {
   while (ROT_SW != LOW)
@@ -131,59 +215,6 @@ void debugMode()
 
     delay(100);
   }
-}
-
-void injectorModeMenu()
-{
-  String menuItems[] = {"Toggle", "Continuous", "Dose Mode"};
-  bool optionSelected = false;
-  int index = 0;
-  lcd.print(menuItems[index]);
-
-  while (!optionSelected)
-  {
-    int index = (encoder.read() / 4) % 3; // calculate the index
-
-    if (index < 0) // if the index is negative
-    {
-      index += 3; // wrap around to the last item
-    }
-
-    if (index != prevIndex)
-    {
-      lcd.clear();
-      lcd.print(menuItems[index]);
-      prevIndex = index;
-    }
-
-    if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
-    {
-      optionSelected = true;
-      switch (index)
-      {
-      case 0:
-        // set injectorMode variable to 0 (toggle mode)
-        break;
-        // set injectorMode variable to 1 (continuous mode)
-        break;
-      case 2:
-        // set injectorMode variable to 2 (volumetric mode)
-        break;
-      }
-    }
-  }
-}
-
-void flowRateMenu()
-{
-}
-
-void settingsMenu()
-{
-}
-
-void calibrate()
-{
 }
 
 void drawMushrooms()
