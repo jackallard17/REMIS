@@ -84,8 +84,6 @@ void loop()
     case 1:
       flowRateMenu();
     case 2:
-      calibrate();
-    case 3:
       settingsMenu();
     }
   }
