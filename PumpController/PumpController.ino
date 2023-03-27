@@ -31,7 +31,7 @@ uint8_t mushroom[8] = {
     0b00100,
     0b00100};
 
-String menuItems[] = {"Injector Mode", "Flow Rate", "Calibrate", "Settings"}; // debug/diagnostics mode is hidden
+String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagnostics mode is hidden
 int menuItemIndex = 0;
 int prevIndex;
 
@@ -61,16 +61,16 @@ void setup()
 
   lcd.clear();
   lcd.print(menuItems[menuItemIndex]);
-  prevIndex = (encoder.read() / 4) % 4; // store inital state of rotary encoder
+  prevIndex = (encoder.read() / 4) % 3; // store inital state of rotary encoder
 }
 
 void loop()
 {
-  int menuItemIndex = (encoder.read() / 4) % 4; // calculate the index
+  int menuItemIndex = (encoder.read() / 4) % 3; // calculate the index
 
   if (menuItemIndex < 0) // if the index is negative
   {
-    menuItemIndex += 4; // wrap around to the last item
+    menuItemIndex += 3; // wrap around to the last item
   }
 
   if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
