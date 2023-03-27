@@ -31,7 +31,7 @@ uint8_t mushroom[8] = {
     0b00100,
     0b00100};
 
-String menuItems[] = {"Flow Rate", "Pump Direction", "Injector Mode", "Calibrate"}; // debug/diagnostics mode is hidden
+String menuItems[] = {"Injector Mode", "Flow Rate", "Calibrate", "Settings"}; // debug/diagnostics mode is hidden
 int menuItemIndex = 0;
 int prevIndex;
 
@@ -61,7 +61,7 @@ void setup()
 
   lcd.clear();
   lcd.print(menuItems[menuItemIndex]);
-  prevIndex = (encoder.read() / 4) % 4; //store inital state of rotary encoder
+  prevIndex = (encoder.read() / 4) % 4; // store inital state of rotary encoder
 }
 
 void loop()
@@ -75,20 +75,18 @@ void loop()
 
   if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
   {
+    lcd.clear();
     // enter the submenu for the current menu item
     switch (menuItemIndex)
     {
     case 0:
-      // Execute the "Injector Mode" menu item
-      break;
+      injectorModeMenu();
     case 1:
-      // Execute the "Calibrate" menu item
-      break;
+      flowRateMenu();
     case 2:
-      // Execute the "Manual Mode" menu item
-      break;
+      calibrate();
     case 3:
-      break;
+      settingsMenu();
     }
   }
 
@@ -128,29 +126,57 @@ void debugMode()
   }
 }
 
+void injectorModeMenu()
+{
+  String menuItems[] = {"Toggle", "Continuous", "Dose Mode"};
+  bool optionSelected = false;
+  lcd.print(menuItems[menuItemIndex]);
+
+  while (!optionSelected)
+  {
+    int menuItemIndex = (encoder.read() / 4) % 3; // calculate the index
+
+    if (menuItemIndex < 0) // if the index is negative
+    {
+      menuItemIndex += 3; // wrap around to the last item
+    }
+
+    if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
+    {
+      optionSelected = true;
+      // enter the submenu for the current menu item
+      switch (menuItemIndex)
+      {
+      case 0:
+        // set injectorMode variable to 0 (toggle mode)
+        break;
+        // set injectorMode variable to 1 (continuous mode)
+        break;
+      case 2:
+        // set injectorMode variable to 2 (volumetric mode)
+        break;
+      }
+    }
+
+    if (menuItemIndex != prevIndex)
+    {
+      lcd.clear();
+      lcd.print(menuItems[menuItemIndex]);
+      prevIndex = menuItemIndex;
+    }
+  }
+}
+
 void flowRateMenu()
 {
-
 }
 
-void pumpDirectionMenu()
+void settingsMenu()
 {
-
-}
-
-void injectorModeMenu()
-{
-
-}
-
-void injectorModeMenu()
-{
-
 }
 
 void calibrate()
 {
-
 }
 
 void drawMushrooms()
