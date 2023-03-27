@@ -91,15 +91,19 @@ void loop()
   {
     lcd.clear();
     submenuVisited = true;
+    delay(100);
     // enter the submenu for the current menu item
     switch (mainIndex)
     {
     case 0:
       injectorModeMenu();
+      break;
     case 1:
       flowRateMenu();
+      break;
     case 2:
       settingsMenu();
+      break;
     }
   }
 
@@ -131,6 +135,7 @@ void injectorModeMenu()
     if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
     {
       optionSelected = true;
+      delay(100);
       switch (index)
       {
       case 0:
@@ -174,6 +179,7 @@ void settingsMenu()
     if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
     {
       optionSelected = true;
+      delay(100);
       switch (index)
       {
       case 0:
