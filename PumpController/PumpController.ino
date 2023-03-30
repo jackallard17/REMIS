@@ -1,3 +1,13 @@
+#include <baseMacros.h>
+#include <items.h>
+#include <macros.h>
+#include <menu.h>
+#include <menuBase.h>
+#include <menuDefs.h>
+#include <menuIo.h>
+#include <nav.h>
+#include <shadows.h>
+
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
 #include <stdint.h>
