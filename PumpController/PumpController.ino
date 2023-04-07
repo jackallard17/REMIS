@@ -23,8 +23,8 @@ Encoder encoder(2, 3);
 #define ROT_DT 3  // rotary encoder direction
 #define ROT_SW 4  // rotary encoder switch (press in)
 
-#define STEPPER_DIR 5
-#define STEPPER_STEP 6
+#define STEPPER_STEP 8
+#define STEPPER_DIR 9
 
 #define LCD_SDA 22
 #define LCD_SDL 21
