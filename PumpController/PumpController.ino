@@ -46,6 +46,10 @@ int mainIndex = 0;
 int prevIndex;
 bool submenuVisited = false;
 
+// pump properties
+int frequency = 951;
+unsigned long step_delay = 1000000 / frequency; // Calculate initial delay in microseconds
+
 void setup()
 {
   // LCD init and startup message
@@ -63,6 +67,7 @@ void setup()
   pinMode(ROT_CLK, INPUT);
   pinMode(ROT_DT, INPUT);
   pinMode(ROT_SW, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT); // Set onboard LED pin as output
 
   // outputs
   pinMode(STEPPER_DIR, OUTPUT);
@@ -77,7 +82,12 @@ void setup()
 
 void loop()
 {
-  if(submenuVisited)
+  if (digitalRead(TOGGLE) == LOW)
+  {
+    manualMode();
+  }
+
+  if (submenuVisited)
   {
     lcd.print(menuItems[mainIndex]);
     submenuVisited = false;
@@ -116,7 +126,6 @@ void loop()
       break;
     }
   }
-
 }
 
 void injectorModeMenu()
@@ -203,6 +212,18 @@ void settingsMenu()
 
 void calibrate()
 {
+}
+
+void manualMode()
+{
+  digitalWrite(STEPPER_STEP, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH); // turn the LED on
+  // delayMicroseconds(1000);
+  delay(50);
+  digitalWrite(STEPPER_STEP, LOW);
+  digitalWrite(LED_BUILTIN, LOW); // turn the LED on
+  delay(50);
+  // delayMicroseconds(1000);
 }
 
 void debugMode()
