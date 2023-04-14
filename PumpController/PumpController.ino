@@ -40,12 +40,13 @@ String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagno
 int mainIndex = 0;
 int prevIndex;
 bool submenuVisited = false;
+bool pumpRunning = false;
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // pump properties
-int frequency = 1000;                          // frequency of the pump in Hz
-float period = 1.0 / frequency;                    // period of the pump in seconds
+int frequency = 1100;           // frequency of the pump in Hz
+float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
 void setup()
@@ -82,15 +83,63 @@ void setup()
 
 void loop()
 {
-  //manual mode is triggered by the toggle switch
+  // manual mode is triggered by the toggle switch
   int switchState = digitalRead(TOGGLE);
-  if (switchState == LOW) {
+  if (switchState == LOW)
+  {
     runPump();
-  } else {
+  }
+  else
+  {
     digitalWrite(STEPPER_STEP, LOW);
     digitalWrite(LED_BUILTIN, LOW);
+    if (pumpRunning == true)
+    {
+      lcd.clear();
+      lcd.print(menuItems[mainIndex]);
+      pumpRunning = false;
+    }
   }
 
+  if (pumpRunning)
+  {
+    // modify the frequency of the pump in intervals of 10hz using the rotary encoder
+    if (digitalRead(ROT_CLK) == LOW)
+    {
+      frequency += 10;
+      period = 1.0 / frequency;
+      step_delay_microseconds = (period / 2) * 1000000;
+      lcd.clear();
+      lcd.print("Pump Running...");
+      lcd.setCursor(0, 1);
+      lcd.print(frequency);
+      lcd.print("Hz");
+      delay(100);
+    }
+    else if (digitalRead(ROT_DT) == LOW)
+    {
+      frequency -= 10;
+      period = 1.0 / frequency;
+      step_delay_microseconds = (period / 2) * 1000000;
+      lcd.clear();
+      lcd.print("Pump Running...");
+      lcd.setCursor(0, 1);
+      lcd.print(frequency);
+      lcd.print("Hz");
+      delay(100);
+    }
+
+  }
+  else
+  {
+    mainMenu();
+  }
+
+
+}
+
+void mainMenu()
+{
   if (submenuVisited)
   {
     lcd.print(menuItems[mainIndex]);
@@ -222,6 +271,17 @@ void calibrate()
 //  pump frequency is set by frequency variable
 void runPump()
 {
+  if (pumpRunning == false)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Pump Running...");
+    lcd.setCursor(0, 1);
+    lcd.print(frequency);
+    lcd.print("Hz");
+    pumpRunning = true;
+  }
+
   digitalWrite(STEPPER_STEP, HIGH);
   digitalWrite(LED_BUILTIN, HIGH);
   delayMicroseconds(step_delay_microseconds);
@@ -260,17 +320,19 @@ void debugMode()
 
 void injectionAnimation()
 {
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 16; i++)
+  {
     lcd.setCursor(i, 0);
     lcd.write(byte(0));
-    delay(500);
+    delay(100);
     lcd.setCursor(i, 0);
     lcd.print(" ");
   }
-  for (int i = 5; i >= 0; i--) {
+  for (int i = 15; i >= 0; i--)
+  {
     lcd.setCursor(i, 1);
     lcd.write(byte(0));
-    delay(500);
+    delay(100);
     lcd.setCursor(i, 1);
     lcd.print(" ");
   }
