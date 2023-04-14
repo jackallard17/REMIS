@@ -16,7 +16,7 @@ Encoder encoder(2, 3);
 #define ROT_SW 4  // rotary encoder switch (press in)
 
 #define STEPPER_STEP 5
-// #define STEPPER_DIR 9
+#define STEPPER_DIR 9
 
 #define LCD_SDA 22
 #define LCD_SDL 21
@@ -44,9 +44,9 @@ bool submenuVisited = false;
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // pump properties
-int frequency = 10000;                          // frequency of the pump in Hz
-long period = 1 / frequency;                    // period of the pump in seconds
-long step_delay = period / 2;
+int frequency = 1000;                          // frequency of the pump in Hz
+float period = 1.0 / frequency;                    // period of the pump in seconds
+long step_delay_microseconds = (period / 2) * 1000000;
 
 void setup()
 {
@@ -85,12 +85,7 @@ void loop()
   //manual mode is triggered by the toggle switch
   int switchState = digitalRead(TOGGLE);
   if (switchState == LOW) {
-    digitalWrite(STEPPER_STEP, HIGH); 
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(step_delay);
-    digitalWrite(STEPPER_STEP, LOW);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(step_delay);
+    runPump();
   } else {
     digitalWrite(STEPPER_STEP, LOW);
     digitalWrite(LED_BUILTIN, LOW);
@@ -225,14 +220,14 @@ void calibrate()
 
 // run the pump in manual mode, triggered by the toggle switch
 //  pump frequency is set by frequency variable
-void manualMode()
+void runPump()
 {
   digitalWrite(STEPPER_STEP, HIGH);
   digitalWrite(LED_BUILTIN, HIGH);
-  delayMicroseconds(step_delay);
+  delayMicroseconds(step_delay_microseconds);
   digitalWrite(STEPPER_STEP, LOW);
   digitalWrite(LED_BUILTIN, LOW);
-  delayMicroseconds(step_delay);
+  delayMicroseconds(step_delay_microseconds);
 }
 
 void debugMode()
@@ -260,6 +255,24 @@ void debugMode()
     lcd.print(encoder.read());
 
     delay(100);
+  }
+}
+
+void injectionAnimation()
+{
+  for (int i = 0; i < 6; i++) {
+    lcd.setCursor(i, 0);
+    lcd.write(byte(0));
+    delay(500);
+    lcd.setCursor(i, 0);
+    lcd.print(" ");
+  }
+  for (int i = 5; i >= 0; i--) {
+    lcd.setCursor(i, 1);
+    lcd.write(byte(0));
+    delay(500);
+    lcd.setCursor(i, 1);
+    lcd.print(" ");
   }
 }
 
