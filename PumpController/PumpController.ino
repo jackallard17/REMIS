@@ -135,6 +135,25 @@ void loop()
     mainMenu();
   }
 
+  //if the rotary encoder button is held for 5 seconds, enter debug mode
+  if (digitalRead(ROT_SW) == LOW)
+  {
+    int i = 0;
+    while (i < 500)
+    {
+      if (digitalRead(ROT_SW) == HIGH)
+      {
+        break;
+      }
+      delay(10);
+      i++;
+    }
+    if (i == 500)
+    {
+      debugMode();
+    }
+  }
+
 
 }
 
@@ -292,9 +311,16 @@ void runPump()
 
 void debugMode()
 {
-  while (ROT_SW != LOW)
-  {
+  //print debug mode on screen
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Debug Mode");
 
+  delay(1000);
+  lcd.clear();
+
+  while (true)
+  {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("T:");
@@ -315,6 +341,11 @@ void debugMode()
     lcd.print(encoder.read());
 
     delay(100);
+
+    if (digitalRead(ROT_SW) == LOW)
+    {
+      break;
+    }
   }
 }
 
