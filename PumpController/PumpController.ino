@@ -1,12 +1,4 @@
-#include <baseMacros.h>
-#include <items.h>
-#include <macros.h>
-#include <menu.h>
-#include <menuBase.h>
-#include <menuDefs.h>
-#include <menuIo.h>
-#include <nav.h>
-#include <shadows.h>
+#include <Stepper.h>
 
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
@@ -23,13 +15,16 @@ Encoder encoder(2, 3);
 #define ROT_DT 3  // rotary encoder direction
 #define ROT_SW 4  // rotary encoder switch (press in)
 
-#define STEPPER_STEP 8
-#define STEPPER_DIR 9
+#define STEPPER_STEP 5
+// #define STEPPER_DIR 9
 
 #define LCD_SDA 22
 #define LCD_SDL 21
+
 #define TOGGLE 8
 #define TRIGGER 9
+
+#define STEPS 200
 
 uint8_t mushroom[8] = {
     0b00000,
@@ -46,9 +41,12 @@ int mainIndex = 0;
 int prevIndex;
 bool submenuVisited = false;
 
+Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
+
 // pump properties
-int frequency = 951;
-unsigned long step_delay = 1000000 / frequency; // Calculate initial delay in microseconds
+int frequency = 10000;                          // frequency of the pump in Hz
+long period = 1 / frequency;                    // period of the pump in seconds
+long step_delay = period / 2;
 
 void setup()
 {
@@ -78,13 +76,24 @@ void setup()
   lcd.clear();
   lcd.print(menuItems[mainIndex]);
   prevIndex = (encoder.read() / 4) % 3; // store inital state of rotary encoder
+
+  digitalWrite(10, HIGH);
 }
 
 void loop()
 {
-  if (digitalRead(TOGGLE) == LOW)
-  {
-    manualMode();
+  //manual mode is triggered by the toggle switch
+  int switchState = digitalRead(TOGGLE);
+  if (switchState == LOW) {
+    digitalWrite(STEPPER_STEP, HIGH); 
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(step_delay);
+    digitalWrite(STEPPER_STEP, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(step_delay);
+  } else {
+    digitalWrite(STEPPER_STEP, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
   }
 
   if (submenuVisited)
@@ -214,16 +223,16 @@ void calibrate()
 {
 }
 
+// run the pump in manual mode, triggered by the toggle switch
+//  pump frequency is set by frequency variable
 void manualMode()
 {
   digitalWrite(STEPPER_STEP, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH); // turn the LED on
-  // delayMicroseconds(1000);
-  delay(50);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delayMicroseconds(step_delay);
   digitalWrite(STEPPER_STEP, LOW);
-  digitalWrite(LED_BUILTIN, LOW); // turn the LED on
-  delay(50);
-  // delayMicroseconds(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delayMicroseconds(step_delay);
 }
 
 void debugMode()
