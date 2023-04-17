@@ -45,7 +45,7 @@ bool pumpRunning = false;
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // pump properties
-int frequency = 1100;           // frequency of the pump in Hz
+float frequency = 1100;           // frequency of the pump in Hz
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
@@ -84,8 +84,7 @@ void setup()
 void loop()
 {
   // manual mode is triggered by the toggle switch
-  int switchState = digitalRead(TOGGLE);
-  if (switchState == LOW)
+  if (digitalRead(TOGGLE) == LOW || digitalRead(TRIGGER) == LOW)
   {
     runPump();
   }
@@ -112,8 +111,8 @@ void loop()
       lcd.clear();
       lcd.print("Pump Running...");
       lcd.setCursor(0, 1);
-      lcd.print(frequency);
-      lcd.print("Hz");
+      lcd.print(getRPM());
+      lcd.print(" RPM");
       delay(100);
     }
     else if (digitalRead(ROT_DT) == LOW)
@@ -124,8 +123,8 @@ void loop()
       lcd.clear();
       lcd.print("Pump Running...");
       lcd.setCursor(0, 1);
-      lcd.print(frequency);
-      lcd.print("Hz");
+      lcd.print(getRPM());
+      lcd.print(" RPM");
       delay(100);
     }
 
@@ -296,8 +295,8 @@ void runPump()
     lcd.setCursor(0, 0);
     lcd.print("Pump Running...");
     lcd.setCursor(0, 1);
-    lcd.print(frequency);
-    lcd.print("Hz");
+    lcd.print(getRPM());
+    lcd.print(" RPM");
     pumpRunning = true;
   }
 
@@ -368,6 +367,13 @@ void injectionAnimation()
     lcd.print(" ");
   }
 }
+
+int getRPM()
+{
+  float rpmFloat = (frequency * 60.0) / 200.0;
+  return (int)rpmFloat;
+}
+
 
 void drawMushrooms()
 {
