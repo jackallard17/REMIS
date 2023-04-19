@@ -162,6 +162,7 @@ void mainMenu()
 
   if (submenuVisited)
   {
+    lcd.clear();
     lcd.print(menuItems[mainIndex]);
     submenuVisited = false;
   }
