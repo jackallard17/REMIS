@@ -158,6 +158,8 @@ void loop()
 
 void mainMenu()
 {
+  delay(50); //debounce
+
   if (submenuVisited)
   {
     lcd.print(menuItems[mainIndex]);
