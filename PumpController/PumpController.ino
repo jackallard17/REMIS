@@ -49,6 +49,9 @@ float frequency = 1100;           // frequency of the pump in Hz
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
+volatile int last_CLK_state = LOW;
+volatile int last_DT_state = LOW;
+
 void setup()
 {
   // LCD init and startup message
@@ -63,9 +66,12 @@ void setup()
   // inputs
   pinMode(TOGGLE, INPUT_PULLUP);
   pinMode(TRIGGER, INPUT_PULLUP);
-  pinMode(ROT_CLK, INPUT);
-  pinMode(ROT_DT, INPUT);
+  pinMode(ROT_CLK, INPUT_PULLUP);
+  pinMode(ROT_DT, INPUT_PULLUP);
   pinMode(ROT_SW, INPUT);
+
+  attachInterrupt(digitalPinToInterrupt(ROT_CLK), updateFrequency, CHANGE);
+
   pinMode(LED_BUILTIN, OUTPUT); // Set onboard LED pin as output
 
   // outputs
@@ -100,36 +106,7 @@ void loop()
     }
   }
 
-  if (pumpRunning)
-  {
-    // modify the frequency of the pump in intervals of 10hz using the rotary encoder
-    if (digitalRead(ROT_CLK) == LOW)
-    {
-      frequency += 10;
-      period = 1.0 / frequency;
-      step_delay_microseconds = (period / 2) * 1000000;
-      lcd.clear();
-      lcd.print("Pump Running...");
-      lcd.setCursor(0, 1);
-      lcd.print(getRPM());
-      lcd.print(" RPM");
-      delay(100);
-    }
-    else if (digitalRead(ROT_DT) == LOW)
-    {
-      frequency -= 10;
-      period = 1.0 / frequency;
-      step_delay_microseconds = (period / 2) * 1000000;
-      lcd.clear();
-      lcd.print("Pump Running...");
-      lcd.setCursor(0, 1);
-      lcd.print(getRPM());
-      lcd.print(" RPM");
-      delay(100);
-    }
-
-  }
-  else
+  if (!pumpRunning) 
   {
     mainMenu();
   }
@@ -309,6 +286,22 @@ void runPump()
   digitalWrite(STEPPER_STEP, LOW);
   digitalWrite(LED_BUILTIN, LOW);
   delayMicroseconds(step_delay_microseconds);
+}
+
+void updateFrequency() {
+  int CLK_state = digitalRead(ROT_CLK);
+  int DT_state = digitalRead(ROT_DT);
+  if (CLK_state != last_CLK_state) {
+    if (DT_state != CLK_state) {
+      frequency += 10;
+    } else {
+      frequency -= 10;
+    }
+    
+    period = 1.0 / frequency;
+    step_delay_microseconds = (period / 2) * 1000000;
+    last_CLK_state = CLK_state;
+  }
 }
 
 void debugMode()
