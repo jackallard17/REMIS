@@ -45,7 +45,7 @@ bool pumpRunning = false;
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // pump properties
-float frequency = 1100;           // frequency of the pump in Hz
+float frequency = 1100;         // frequency of the pump in Hz
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
@@ -108,12 +108,12 @@ void loop()
     }
   }
 
-  if (!pumpRunning) 
+  if (!pumpRunning)
   {
     mainMenu();
   }
 
-  //if the rotary encoder button is held for 5 seconds, enter debug mode
+  // if the rotary encoder button is held for 5 seconds, enter debug mode
   if (digitalRead(ROT_SW) == LOW)
   {
     int i = 0;
@@ -131,13 +131,11 @@ void loop()
       debugMode();
     }
   }
-
-
 }
 
 void mainMenu()
 {
-  delay(50); //debounce
+  delay(50); // debounce
 
   if (submenuVisited)
   {
@@ -254,9 +252,9 @@ void settingsMenu()
       delay(100);
       switch (index)
       {
-      case 0: //set dose
+      case 0: // set dose
         break;
-      case 1: //calibrate
+      case 1: // calibrate
         calibrate();
       }
     }
@@ -276,7 +274,7 @@ void calibrate()
   {
     if (digitalRead(TOGGLE) == LOW || digitalRead(TRIGGER) == LOW)
     {
-      if (!dispensing) 
+      if (!dispensing)
       {
         start_time = millis(); // Start the timer
         runPump();
@@ -289,7 +287,7 @@ void calibrate()
     }
     else
     {
-      if (dispensing) 
+      if (dispensing)
       {
         calibrating = false;
       }
@@ -300,9 +298,9 @@ void calibrate()
   lcd.setCursor(0, 0);
   lcd.print("Calibration Complete");
 
-  unsigned long elapsed_time = millis() - start_time; // Calculate the elapsed time in milliseconds
+  unsigned long elapsed_time = millis() - start_time;         // Calculate the elapsed time in milliseconds
   float num_revs = getRPM() * (elapsed_time / 1000.0) / 60.0; // Calculate the number of revolutions
-  float flow_rate = 100 / (elapsed_time / 60000.0); //100 ml divided by the elapsed time in minutes (gives ml/min)
+  float flow_rate = 100 / (elapsed_time / 60000.0);           // 100 ml divided by the elapsed time in minutes (gives ml/min)
 
   ml_per_rev = 100 / num_revs; // Calculate the volume dispensed per revolution, in ml/rev
 
@@ -336,16 +334,21 @@ void runPump()
   delayMicroseconds(step_delay_microseconds);
 }
 
-void updateFrequency() {
+void updateFrequency()
+{
   int CLK_state = digitalRead(ROT_CLK);
   int DT_state = digitalRead(ROT_DT);
-  if (CLK_state != last_CLK_state) {
-    if (DT_state != CLK_state) {
+  if (CLK_state != last_CLK_state)
+  {
+    if (DT_state != CLK_state)
+    {
       frequency += 10;
-    } else {
+    }
+    else
+    {
       frequency -= 10;
     }
-    
+
     period = 1.0 / frequency;
     step_delay_microseconds = (period / 2) * 1000000;
     last_CLK_state = CLK_state;
@@ -354,7 +357,7 @@ void updateFrequency() {
 
 void debugMode()
 {
-  //print debug mode on screen
+  // print debug mode on screen
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Debug Mode");
@@ -418,6 +421,10 @@ int getRPM()
   return (int)rpmFloat;
 }
 
+float getFlowRate()
+{
+  return ml_per_rev * getRPM() / 60;
+}
 
 void drawMushrooms()
 {
