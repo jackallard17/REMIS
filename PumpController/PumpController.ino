@@ -49,6 +49,8 @@ float frequency = 1100;           // frequency of the pump in Hz
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
+float ml_per_rev;
+
 volatile int last_CLK_state = LOW;
 volatile int last_DT_state = LOW;
 
@@ -252,10 +254,10 @@ void settingsMenu()
       delay(100);
       switch (index)
       {
-      case 0:
+      case 0: //set dose
         break;
-      case 1:
-        break;
+      case 1: //calibrate
+        calibrate();
       }
     }
   }
@@ -263,6 +265,52 @@ void settingsMenu()
 
 void calibrate()
 {
+  bool calibrating = true;
+  bool dispensing = false;
+  lcd.clear();
+  lcd.print("Dispense 100ml");
+
+  unsigned long start_time;
+
+  while (calibrating)
+  {
+    if (digitalRead(TOGGLE) == LOW || digitalRead(TRIGGER) == LOW)
+    {
+      if (!dispensing) 
+      {
+        start_time = millis(); // Start the timer
+        runPump();
+        dispensing = true;
+      }
+      else
+      {
+        runPump();
+      }
+    }
+    else
+    {
+      if (dispensing) 
+      {
+        calibrating = false;
+      }
+    }
+  }
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Calibration Complete");
+
+  unsigned long elapsed_time = millis() - start_time; // Calculate the elapsed time in milliseconds
+  float num_revs = getRPM() * (elapsed_time / 1000.0) / 60.0; // Calculate the number of revolutions
+  float flow_rate = 100 / (elapsed_time / 60000.0); //100 ml divided by the elapsed time in minutes (gives ml/min)
+
+  ml_per_rev = 100 / num_revs; // Calculate the volume dispensed per revolution, in ml/rev
+
+  lcd.setCursor(0, 1);
+  lcd.print(flow_rate);
+  lcd.print(" ml/min");
+
+  delay(3000);
 }
 
 // run the pump in manual mode, triggered by the toggle switch
