@@ -44,8 +44,11 @@ bool pumpRunning = false;
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
-// pump properties
-float frequency = 1100;         // frequency of the pump in Hz
+// persistent properties, stored between power cycles
+float frequency = 1100; // frequency of the pump in Hz
+int injectorMode = 0;   // 0 = toggle, 1 = continuous, 2 = dose mode
+int dose = 12;          // dose amount in mL
+
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
@@ -92,9 +95,43 @@ void setup()
 void loop()
 {
   // manual mode is triggered by the toggle switch
-  if (digitalRead(TOGGLE) == LOW || digitalRead(TRIGGER) == LOW)
+  if (digitalRead(TOGGLE) == LOW)
   {
     runPump();
+  }
+  else if (digitalRead(TRIGGER) == LOW)
+  {
+    switch (injectorMode)
+    {
+    case 0: // toggle mode
+      if (pumpRunning == false)
+      {
+        runPump();
+      }
+      else
+      {
+        digitalWrite(STEPPER_STEP, LOW);
+        digitalWrite(LED_BUILTIN, LOW);
+        pumpRunning = false;
+      }
+    case 1: // continuous mode
+      //run the pump until the trigger is released 
+      while (digitalRead(TRIGGER) == LOW)
+      {
+        runPump();
+      }
+    case 2:                                                // dose mode
+      unsigned long duration = (dose / getFlowRate()) * 60000; // Calculate the duration of time needed to dispense the dose
+      unsigned long startTime = millis();                  // Get the current time
+
+      Serial.print("Duration: ");
+      Serial.println(duration); 
+
+      while (millis() - startTime < duration)
+      {
+        runPump();
+      }
+    }
   }
   else
   {
@@ -209,11 +246,11 @@ void injectorModeMenu()
       switch (index)
       {
       case 0:
-        break;
+        injectorMode = 0;
       case 1:
-        break;
+        injectorMode = 1;
       case 2:
-        break;
+        injectorMode = 2;
       }
     }
   }
@@ -352,6 +389,26 @@ void updateFrequency()
     period = 1.0 / frequency;
     step_delay_microseconds = (period / 2) * 1000000;
     last_CLK_state = CLK_state;
+  }
+}
+
+void toggleMode() {
+  bool isRunning = false;
+  while (true) {
+    if (digitalRead(TRIGGER) == LOW) {
+      if (!isRunning) {
+        runPump();
+        isRunning = true;
+      } else {
+        digitalWrite(STEPPER_STEP, LOW);
+        digitalWrite(LED_BUILTIN, LOW);
+        isRunning = false;
+      }
+      // Wait until trigger is released
+      while (digitalRead(TRIGGER) == LOW) {
+        delay(10);
+      }
+    }
   }
 }
 
