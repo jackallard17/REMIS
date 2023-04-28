@@ -1,9 +1,6 @@
 #include <Stepper.h>
-
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
-#include <stdint.h>
-#include <Wire.h>
 
 using namespace std;
 
