@@ -449,26 +449,6 @@ void debugMode()
   }
 }
 
-void injectionAnimation()
-{
-  for (int i = 0; i < 16; i++)
-  {
-    lcd.setCursor(i, 0);
-    lcd.write(byte(0));
-    delay(100);
-    lcd.setCursor(i, 0);
-    lcd.print(" ");
-  }
-  for (int i = 15; i >= 0; i--)
-  {
-    lcd.setCursor(i, 1);
-    lcd.write(byte(0));
-    delay(100);
-    lcd.setCursor(i, 1);
-    lcd.print(" ");
-  }
-}
-
 int getRPM()
 {
   float rpmFloat = (frequency * 60.0) / 200.0;
