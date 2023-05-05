@@ -43,7 +43,7 @@ Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // persistent properties, stored between power cycles
 float frequency = 1100; // frequency of the pump in Hz
-int injectorMode = 0;   // 0 = toggle, 1 = continuous, 2 = dose mode
+int injectorMode = 2;   // 0 = toggle, 1 = continuous, 2 = dose mode
 int dose = 12;          // dose amount in mL
 
 float period = 1.0 / frequency; // period of the pump in seconds
@@ -121,21 +121,19 @@ void loop()
         pumpRunning = false;
       }
     case 1: // continuous mode
-      //run the pump until the trigger is released 
+      // run the pump until the trigger is released
       while (digitalRead(TRIGGER) == LOW)
       {
         runPump();
       }
-    case 2:                                                // dose mode
-      unsigned long duration = (dose / getFlowRate()) * 60000; // Calculate the duration of time needed to dispense the dose
-      unsigned long startTime = millis();                  // Get the current time
+    case 2: // dose mode
+      int steps = 0;
+      int doseSteps = dose * ml_per_rev;
 
-      Serial.print("Duration: ");
-      Serial.println(duration); 
-
-      while (millis() - startTime < duration)
+      while (steps < doseSteps)
       {
         runPump();
+        steps++;
       }
     }
   }
@@ -398,20 +396,27 @@ void updateFrequency()
   }
 }
 
-void toggleMode() {
+void toggleMode()
+{
   bool isRunning = false;
-  while (true) {
-    if (digitalRead(TRIGGER) == LOW) {
-      if (!isRunning) {
+  while (true)
+  {
+    if (digitalRead(TRIGGER) == LOW)
+    {
+      if (!isRunning)
+      {
         runPump();
         isRunning = true;
-      } else {
+      }
+      else
+      {
         digitalWrite(STEPPER_STEP, LOW);
         digitalWrite(LED_BUILTIN, LOW);
         isRunning = false;
       }
       // Wait until trigger is released
-      while (digitalRead(TRIGGER) == LOW) {
+      while (digitalRead(TRIGGER) == LOW)
+      {
         delay(10);
       }
     }
