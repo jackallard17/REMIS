@@ -49,7 +49,7 @@ int dose = 12;          // dose amount in mL
 float period = 1.0 / frequency; // period of the pump in seconds
 long step_delay_microseconds = (period / 2) * 1000000;
 
-float ml_per_rev;
+float ml_per_rev = 200;
 
 volatile int last_CLK_state = LOW;
 volatile int last_DT_state = LOW;
