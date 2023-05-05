@@ -43,7 +43,7 @@ Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // persistent properties, stored between power cycles
 float frequency = 1100; // frequency of the pump in Hz
-int injectorMode = 1;   // 0 = toggle, 1 = continuous, 2 = dose mode
+int injectorMode = 0;   // 0 = toggle, 1 = continuous, 2 = dose mode
 int dose = 12;          // dose amount in mL
 
 float period = 1.0 / frequency; // period of the pump in seconds
@@ -103,7 +103,16 @@ void loop()
     case 0: // toggle mode
       if (pumpRunning == false)
       {
-        runPump();
+        delay(250);
+        while (digitalRead(TRIGGER) == HIGH)
+        {
+          runPump();
+
+          if (digitalRead(TRIGGER) == LOW)
+          {
+            break;
+          }
+        }
       }
       else
       {
