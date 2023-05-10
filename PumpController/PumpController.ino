@@ -125,27 +125,7 @@ void loop()
   {
     switch (injectorMode)
     {
-    case 0: // toggle mode
-      if (pumpRunning == false)
-      {
-        delay(250);
-        while (digitalRead(TRIGGER) == HIGH)
-        {
-          runPump();
-
-          if (digitalRead(TRIGGER) == LOW)
-          {
-            break;
-          }
-        }
-      }
-      else
-      {
-        digitalWrite(STEPPER_STEP, LOW);
-        digitalWrite(LED_BUILTIN, LOW);
-        pumpRunning = false;
-      }
-    case 1: // continuous mode
+    case 0: // continuous mode
       // run the pump until the trigger is released
       while (digitalRead(TRIGGER) == LOW)
       {
@@ -247,18 +227,18 @@ void mainMenu()
 
 void injectorModeMenu()
 {
-  String injectorModeMenuItems[] = {"Toggle", "Continuous", "Dose Mode"};
+  String injectorModeMenuItems[] = {"Continuous", "Dose Mode"};
   bool optionSelected = false;
   int index = 0;
   lcd.print(injectorModeMenuItems[index]);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 3; // calculate the index
+    int index = (encoder.read() / 4) % 2; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 3; // wrap around to the last item
+      index += 2; // wrap around to the last item
     }
 
     if (index != prevIndex)
@@ -278,8 +258,6 @@ void injectorModeMenu()
         injectorMode = 0;
       case 1:
         injectorMode = 1;
-      case 2:
-        injectorMode = 2;
       }
     }
   }
