@@ -1,6 +1,7 @@
 #include <Stepper.h>
 #include <Encoder.h>
 #include <LiquidCrystal_I2C.h>
+#include <EEPROM.h>
 
 using namespace std;
 
@@ -46,8 +47,8 @@ float frequency = 1100; // frequency of the pump in Hz
 int injectorMode = 2;   // 0 = toggle, 1 = continuous, 2 = dose mode
 int dose = 12;          // dose amount in mL
 
-float period = 1.0 / frequency; // period of the pump in seconds
-long step_delay_microseconds = (period / 2) * 1000000;
+float period;
+long step_delay_microseconds;
 
 float ml_per_rev = 200;
 
@@ -64,6 +65,30 @@ void setup()
   lcd.print("REMIS       v0.0");
   lcd.setCursor(0, 12);
   drawMushrooms();
+
+  // on first startup, initialize the persistent properties
+  if (EEPROM.read(0) == 255)
+  {
+    writeIntToEEPROM(1100, 0);
+    EEPROM.write(2, 2);
+    EEPROM.write(3, 10);
+  }
+
+  frequency = readIntFromEEPROM(0); // read the value and assign it to the frequency variable
+  frequency = frequency / 2;
+  injectorMode = EEPROM.read(2); // 0 = toggle, 1 = continuous, 2 = dose mode
+  dose = EEPROM.read(3);         // dose amount in mL
+
+  // print all three of these values to the serial monitor
+  Serial.print("Frequency: ");
+  Serial.println(frequency);
+  Serial.print("Injector Mode: ");
+  Serial.println(injectorMode);
+  Serial.print("Dose: ");
+  Serial.println(dose);
+
+  period = 1.0 / frequency; // period of the pump in seconds
+  step_delay_microseconds = (period / 2) * 1000000;
 
   // inputs
   pinMode(TOGGLE, INPUT_PULLUP);
@@ -100,27 +125,7 @@ void loop()
   {
     switch (injectorMode)
     {
-    case 0: // toggle mode
-      if (pumpRunning == false)
-      {
-        delay(250);
-        while (digitalRead(TRIGGER) == HIGH)
-        {
-          runPump();
-
-          if (digitalRead(TRIGGER) == LOW)
-          {
-            break;
-          }
-        }
-      }
-      else
-      {
-        digitalWrite(STEPPER_STEP, LOW);
-        digitalWrite(LED_BUILTIN, LOW);
-        pumpRunning = false;
-      }
-    case 1: // continuous mode
+    case 0: // continuous mode
       // run the pump until the trigger is released
       while (digitalRead(TRIGGER) == LOW)
       {
@@ -222,18 +227,18 @@ void mainMenu()
 
 void injectorModeMenu()
 {
-  String injectorModeMenuItems[] = {"Toggle", "Continuous", "Dose Mode"};
+  String injectorModeMenuItems[] = {"Continuous", "Dose Mode"};
   bool optionSelected = false;
   int index = 0;
   lcd.print(injectorModeMenuItems[index]);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 3; // calculate the index
+    int index = (encoder.read() / 4) % 2; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 3; // wrap around to the last item
+      index += 2; // wrap around to the last item
     }
 
     if (index != prevIndex)
@@ -253,8 +258,6 @@ void injectorModeMenu()
         injectorMode = 0;
       case 1:
         injectorMode = 1;
-      case 2:
-        injectorMode = 2;
       }
     }
   }
@@ -467,6 +470,20 @@ int getRPM()
 {
   float rpmFloat = (frequency * 60.0) / 200.0;
   return (int)rpmFloat;
+}
+
+void writeIntToEEPROM(int value, int address) {
+  uint8_t highByte = (value >> 8) & 0xFF; // extract the high byte
+  uint8_t lowByte = value & 0xFF; // extract the low byte
+  EEPROM.write(address, highByte); // write the high byte to EEPROM
+  EEPROM.write(address + 1, lowByte); // write the low byte to EEPROM
+}
+
+int readIntFromEEPROM(int address) {
+  uint8_t highByte = EEPROM.read(address); // read the high byte from EEPROM
+  uint8_t lowByte = EEPROM.read(address + 1); // read the low byte from EEPROM
+  int value = (highByte << 8) | lowByte; // combine the high and low bytes into a 16-bit int
+  return value;
 }
 
 float getFlowRate()
