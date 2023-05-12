@@ -203,7 +203,7 @@ void mainMenu()
   {
     lcd.clear();
     submenuVisited = true;
-    delay(100);
+    delay(150);
     // enter the submenu for the current menu item
     switch (mainIndex)
     {
