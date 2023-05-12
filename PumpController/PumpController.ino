@@ -399,33 +399,6 @@ void updateFrequency()
   }
 }
 
-void toggleMode()
-{
-  bool isRunning = false;
-  while (true)
-  {
-    if (digitalRead(TRIGGER) == LOW)
-    {
-      if (!isRunning)
-      {
-        runPump();
-        isRunning = true;
-      }
-      else
-      {
-        digitalWrite(STEPPER_STEP, LOW);
-        digitalWrite(LED_BUILTIN, LOW);
-        isRunning = false;
-      }
-      // Wait until trigger is released
-      while (digitalRead(TRIGGER) == LOW)
-      {
-        delay(10);
-      }
-    }
-  }
-}
-
 void debugMode()
 {
   // print debug mode on screen
