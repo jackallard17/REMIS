@@ -43,9 +43,9 @@ bool pumpRunning = false;
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // persistent properties, stored between power cycles
-float frequency = 1100; // frequency of the pump in Hz
-int injectorMode = 2;   // 0 = toggle, 1 = continuous, 2 = dose mode
-int dose = 12;          // dose amount in mL
+float frequency; // frequency of the pump in Hz
+int injectorMode;   // 0 = toggle, 1 = continuous, 2 = dose mode
+int dose;          // dose amount in mL
 
 float period;
 long step_delay_microseconds;
@@ -57,6 +57,8 @@ volatile int last_DT_state = LOW;
 
 void setup()
 {
+  Serial.begin(9600);
+
   // LCD init and startup message
   lcd.init();
   lcd.backlight();
@@ -67,17 +69,17 @@ void setup()
   drawMushrooms();
 
   // on first startup, initialize the persistent properties
-  if (EEPROM.read(0) == 255)
-  {
-    writeIntToEEPROM(1100, 0);
-    EEPROM.write(2, 2);
-    EEPROM.write(3, 10);
-  }
+  // if (EEPROM.read(0) == 255)
+  // {
+  writeIntToEEPROM(1100, 0);
+  EEPROM.write(2, 0);
+  EEPROM.write(3, 10);
+  // }
 
-  frequency = readIntFromEEPROM(0); // read the value and assign it to the frequency variable
-  frequency = frequency / 2;
-  injectorMode = EEPROM.read(2); // 0 = toggle, 1 = continuous, 2 = dose mode
-  dose = EEPROM.read(3);         // dose amount in mL
+  frequency = readIntFromEEPROM(0);
+  frequency = frequency;
+  injectorMode = EEPROM.read(2);
+  dose = EEPROM.read(3);
 
   // print all three of these values to the serial monitor
   Serial.print("Frequency: ");
@@ -105,8 +107,6 @@ void setup()
   pinMode(STEPPER_DIR, OUTPUT);
   pinMode(STEPPER_STEP, OUTPUT);
 
-  Serial.begin(9600);
-
   lcd.clear();
   lcd.print(menuItems[mainIndex]);
   prevIndex = (encoder.read() / 4) % 3; // store inital state of rotary encoder
@@ -121,25 +121,19 @@ void loop()
   {
     runPump();
   }
-  else if (digitalRead(TRIGGER) == LOW)
+  else if (digitalRead(TRIGGER) == LOW && injectorMode == 0)
   {
-    switch (injectorMode)
-    {
-    case 0: // continuous mode
-      // run the pump until the trigger is released
-      while (digitalRead(TRIGGER) == LOW)
-      {
-        runPump();
-      }
-    case 2: // dose mode
-      int steps = 0;
-      int doseSteps = dose * ml_per_rev;
+    runPump();
+  }
+  else if (digitalRead(TRIGGER) == LOW && injectorMode == 1)
+  {
+    int steps = 0;
+    int doseSteps = dose * ml_per_rev;
 
-      while (steps < doseSteps)
-      {
-        runPump();
-        steps++;
-      }
+    while (steps < doseSteps)
+    {
+      runPump();
+      steps++;
     }
   }
   else
@@ -445,17 +439,19 @@ int getRPM()
   return (int)rpmFloat;
 }
 
-void writeIntToEEPROM(int value, int address) {
+void writeIntToEEPROM(int value, int address)
+{
   uint8_t highByte = (value >> 8) & 0xFF; // extract the high byte
-  uint8_t lowByte = value & 0xFF; // extract the low byte
-  EEPROM.write(address, highByte); // write the high byte to EEPROM
-  EEPROM.write(address + 1, lowByte); // write the low byte to EEPROM
+  uint8_t lowByte = value & 0xFF;         // extract the low byte
+  EEPROM.write(address, highByte);        // write the high byte to EEPROM
+  EEPROM.write(address + 1, lowByte);     // write the low byte to EEPROM
 }
 
-int readIntFromEEPROM(int address) {
-  uint8_t highByte = EEPROM.read(address); // read the high byte from EEPROM
+int readIntFromEEPROM(int address)
+{
+  uint8_t highByte = EEPROM.read(address);    // read the high byte from EEPROM
   uint8_t lowByte = EEPROM.read(address + 1); // read the low byte from EEPROM
-  int value = (highByte << 8) | lowByte; // combine the high and low bytes into a 16-bit int
+  int value = (highByte << 8) | lowByte;      // combine the high and low bytes into a 16-bit int
   return value;
 }
 
