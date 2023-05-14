@@ -221,18 +221,18 @@ void mainMenu()
 
 void injectorModeMenu()
 {
-  String injectorModeMenuItems[] = {"Continuous", "Dose Mode"};
+  String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
   bool optionSelected = false;
   int index = 0;
   lcd.print(injectorModeMenuItems[index]);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 2; // calculate the index
+    int index = (encoder.read() / 4) % 3; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 2; // wrap around to the last item
+      index += 3; // wrap around to the last item
     }
 
     if (index != prevIndex)
@@ -251,10 +251,14 @@ void injectorModeMenu()
         injectorMode = 0;
         // EEPROM.write(2, 0);
       }
-      else
+      else if (index == 1)
       {
         injectorMode = 1;
         // EEPROM.write(2, 1);
+      }
+      else if (index == 2)
+      {
+        mainMenu();
       }
     }
   }
@@ -266,18 +270,18 @@ void flowRateMenu()
 
 void settingsMenu()
 {
-  String settingsMenuItems[] = {"Set Dose", "Calibrate"};
+  String settingsMenuItems[] = {"Set Dose", "Calibrate", "Back"};
   bool optionSelected = false;
   int index = 0;
   lcd.print(settingsMenuItems[index]);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 2; // calculate the index
+    int index = (encoder.read() / 4) % 3; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 2; // wrap around to the last item
+      index += 3; // wrap around to the last item
     }
 
     if (index != prevIndex)
@@ -297,6 +301,8 @@ void settingsMenu()
         break;
       case 1: // calibrate
         calibrate();
+      case 2: // back
+        mainMenu();
       }
     }
   }
