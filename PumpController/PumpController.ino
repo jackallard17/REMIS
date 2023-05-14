@@ -43,9 +43,9 @@ bool pumpRunning = false;
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
 // persistent properties, stored between power cycles
-float frequency; // frequency of the pump in Hz
-int injectorMode;   // 0 = toggle, 1 = continuous, 2 = dose mode
-int dose;          // dose amount in mL
+float frequency;  // frequency of the pump in Hz
+int injectorMode; // 0 = toggle, 1 = continuous, 2 = dose mode
+int dose;         // dose amount in mL
 
 float period;
 long step_delay_microseconds;
@@ -246,12 +246,15 @@ void injectorModeMenu()
     {
       optionSelected = true;
       delay(100);
-      switch (index)
+      if (index == 0)
       {
-      case 0:
         injectorMode = 0;
-      case 1:
+        // EEPROM.write(2, 0);
+      }
+      else
+      {
         injectorMode = 1;
+        // EEPROM.write(2, 1);
       }
     }
   }
