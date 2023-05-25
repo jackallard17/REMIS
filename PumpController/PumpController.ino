@@ -476,35 +476,9 @@ float getFlowRate()
 void drawMushrooms()
 {
   lcd.setCursor(0, 1);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
+  for (int i = 0; i < 16; i++)
+  {
+    lcd.write((byte)0);
+    delay(100);
+  }
 }
