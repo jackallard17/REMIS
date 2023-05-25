@@ -170,19 +170,14 @@ void loop()
 void mainMenu()
 {
   delay(50); // debounce
+
   if (frequencyUpdated == true)
   {
     writeIntToEEPROM(frequency, 0);
     frequencyUpdated = false;
   }
 
-  if (submenuVisited)
-  {
-    lcd.clear();
-    lcd.print(menuItems[mainIndex]);
-    submenuVisited = false;
-  }
-
+  static int prevMainIndex = -1;
   int mainIndex = (encoder.read() / 4) % 3; // calculate the index
 
   if (mainIndex < 0) // if the index is negative
@@ -190,33 +185,61 @@ void mainMenu()
     mainIndex += 3; // wrap around to the last item
   }
 
-  if (mainIndex != prevIndex)
+  if (mainIndex != prevMainIndex)
   {
     lcd.clear();
-    lcd.print(menuItems[mainIndex]);
-    prevIndex = mainIndex;
+
+    // Display menu items with '>' to mark the selected item
+    if (mainIndex == 0)
+    {
+      lcd.print("> ");
+      lcd.print(menuItems[0]);
+      lcd.setCursor(0, 1);
+      lcd.print("  ");
+      lcd.print(menuItems[1]);
+    }
+    else if (mainIndex == 1)
+    {
+      lcd.print("  ");
+      lcd.print(menuItems[0]);
+      lcd.setCursor(0, 1);
+      lcd.print("> ");
+      lcd.print(menuItems[1]);
+    }
+    else if (mainIndex == 2)
+    {
+      lcd.print("  ");
+      lcd.print(menuItems[1]);
+      lcd.setCursor(0, 1);
+      lcd.print("> ");
+      lcd.print(menuItems[2]);
+    }
+
+    prevMainIndex = mainIndex;
   }
 
   if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
   {
     lcd.clear();
-    submenuVisited = true;
     delay(150);
+    submenuVisited = true;
+
     // enter the submenu for the current menu item
     switch (mainIndex)
     {
-    case 0:
-      injectorModeMenu();
-      break;
-    case 1:
-      flowRateMenu();
-      break;
-    case 2:
-      settingsMenu();
-      break;
+      case 0:
+        injectorModeMenu();
+        break;
+      case 1:
+        flowRateMenu();
+        break;
+      case 2:
+        settingsMenu();
+        break;
     }
   }
 }
+
 
 void injectorModeMenu()
 {
