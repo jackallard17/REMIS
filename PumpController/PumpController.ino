@@ -37,8 +37,10 @@ uint8_t mushroom[8] = {
 String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagnostics mode is hidden
 int mainIndex = 0;
 int prevIndex;
-bool submenuVisited = false;
-bool pumpRunning = false;
+volatile bool submenuVisited = false;
+volatile bool pumpRunning = false;
+volatile bool frequencyUpdated = false;
+
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
@@ -68,13 +70,17 @@ void setup()
   lcd.setCursor(0, 12);
   drawMushrooms();
 
-  // on first startup, initialize the persistent properties
-  // if (EEPROM.read(0) == 255)
-  // {
-  writeIntToEEPROM(1100, 0);
-  EEPROM.write(2, 0);
-  EEPROM.write(3, 10);
-  // }
+  // print eeprom value at location 0 to serial monitor
+  Serial.print("EEPROM value at location 10: ");
+  Serial.println(EEPROM.read(10));
+
+  // on first startup, initialize the persistent properties to default values
+  if (EEPROM.read(0) == 255)
+  {
+    writeIntToEEPROM(1100, 0);
+    EEPROM.write(2, 0);
+    EEPROM.write(3, 10);
+  }
 
   frequency = readIntFromEEPROM(0);
   frequency = frequency;
@@ -176,6 +182,11 @@ void loop()
 void mainMenu()
 {
   delay(50); // debounce
+  if (frequencyUpdated == true)
+  {
+    writeIntToEEPROM(frequency, 0);
+    frequencyUpdated = false;
+  }
 
   if (submenuVisited)
   {
@@ -401,6 +412,8 @@ void updateFrequency()
       period = 1.0 / frequency;
       step_delay_microseconds = (period / 2) * 1000000;
       last_CLK_state = CLK_state;
+
+      frequencyUpdated = true;
     }
   }
 }
