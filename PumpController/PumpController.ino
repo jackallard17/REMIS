@@ -240,7 +240,6 @@ void mainMenu()
   }
 }
 
-
 void injectorModeMenu()
 {
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
@@ -260,7 +259,33 @@ void injectorModeMenu()
     if (index != prevIndex)
     {
       lcd.clear();
-      lcd.print(injectorModeMenuItems[index]);
+
+      // Display menu items with '>' to mark the selected item
+      if (index == 0)
+      {
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[1]);
+      }
+      else if (index == 1)
+      {
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[1]);
+      }
+      else if (index == 2)
+      {
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[1]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[2]);
+      }
+
       prevIndex = index;
     }
 
