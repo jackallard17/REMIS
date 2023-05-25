@@ -383,22 +383,25 @@ void runPump()
 
 void updateFrequency()
 {
-  int CLK_state = digitalRead(ROT_CLK);
-  int DT_state = digitalRead(ROT_DT);
-  if (CLK_state != last_CLK_state)
+  if (pumpRunning)
   {
-    if (DT_state != CLK_state)
+    int CLK_state = digitalRead(ROT_CLK);
+    int DT_state = digitalRead(ROT_DT);
+    if (CLK_state != last_CLK_state)
     {
-      frequency += 10;
-    }
-    else
-    {
-      frequency -= 10;
-    }
+      if (DT_state != CLK_state)
+      {
+        frequency += 10;
+      }
+      else
+      {
+        frequency -= 10;
+      }
 
-    period = 1.0 / frequency;
-    step_delay_microseconds = (period / 2) * 1000000;
-    last_CLK_state = CLK_state;
+      period = 1.0 / frequency;
+      step_delay_microseconds = (period / 2) * 1000000;
+      last_CLK_state = CLK_state;
+    }
   }
 }
 
