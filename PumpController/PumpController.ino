@@ -70,10 +70,6 @@ void setup()
   lcd.setCursor(0, 12);
   drawMushrooms();
 
-  // print eeprom value at location 0 to serial monitor
-  Serial.print("EEPROM value at location 10: ");
-  Serial.println(EEPROM.read(10));
-
   // on first startup, initialize the persistent properties to default values
   if (EEPROM.read(0) == 255)
   {
@@ -86,14 +82,6 @@ void setup()
   frequency = frequency;
   injectorMode = EEPROM.read(2);
   dose = EEPROM.read(3);
-
-  // print all three of these values to the serial monitor
-  Serial.print("Frequency: ");
-  Serial.println(frequency);
-  Serial.print("Injector Mode: ");
-  Serial.println(injectorMode);
-  Serial.print("Dose: ");
-  Serial.println(dose);
 
   period = 1.0 / frequency; // period of the pump in seconds
   step_delay_microseconds = (period / 2) * 1000000;
