@@ -248,12 +248,12 @@ void injectorModeMenu()
       if (index == 0)
       {
         injectorMode = 0;
-        // EEPROM.write(2, 0);
+        EEPROM.write(2, 0);
       }
       else if (index == 1)
       {
         injectorMode = 1;
-        // EEPROM.write(2, 1);
+        EEPROM.write(2, 1);
       }
       else if (index == 2)
       {
