@@ -334,7 +334,33 @@ void settingsMenu()
     if (index != prevIndex)
     {
       lcd.clear();
-      lcd.print(settingsMenuItems[index]);
+
+      // Display menu items with '>' to mark the selected item
+      if (index == 0)
+      {
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[1]);
+      }
+      else if (index == 1)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[1]);
+      }
+      else if (index == 2)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[1]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[2]);
+      }
+
       prevIndex = index;
     }
 
@@ -344,12 +370,15 @@ void settingsMenu()
       delay(100);
       switch (index)
       {
-      case 0: // set dose
-        break;
-      case 1: // calibrate
-        calibrate();
-      case 2: // back
-        mainMenu();
+        case 0: // set dose
+          // Add your code for the "Set Dose" functionality here
+          break;
+        case 1: // calibrate
+          calibrate();
+          break;
+        case 2: // back
+          mainMenu();
+          break;
       }
     }
   }
