@@ -381,31 +381,31 @@ void settingsMenu()
       else if (index == 1)
       {
         lcd.print("  ");
-        lcd.print(settingsMenuItems[0]);
+        lcd.print(settingsMenuItems[1]);
         lcd.setCursor(0, 1);
         lcd.print("> ");
-        lcd.print(settingsMenuItems[1]);
+        lcd.print(settingsMenuItems[2]);
       }
       else if (index == 2)
       {
         lcd.print("  ");
-        lcd.print(settingsMenuItems[1]);
+        lcd.print(settingsMenuItems[2]);
         lcd.setCursor(0, 1);
         lcd.print("> ");
-        lcd.print(settingsMenuItems[2]);
+        lcd.print(settingsMenuItems[3]);
       }
       else if (index == 3)
       {
         lcd.print("  ");
-        lcd.print(settingsMenuItems[2]);
+        lcd.print(settingsMenuItems[3]);
         lcd.setCursor(0, 1);
         lcd.print("> ");
-        lcd.print(settingsMenuItems[3]);
+        lcd.print(settingsMenuItems[4]);
       }
       else if (index == 4)
       {
         lcd.print("  ");
-        lcd.print(settingsMenuItems[3]);
+        lcd.print(settingsMenuItems[4]);
         lcd.setCursor(0, 1);
         lcd.print("> ");
         lcd.print(settingsMenuItems[4]);
@@ -427,13 +427,13 @@ void settingsMenu()
       case 1:
         flowRateMenu();
         break;
-      case 2: // set dose
+      case 2:
         break;
-      case 3: // calibrate
-        calibrate();
-        break;
-      case 4: // back
+      case 3:
         dashboard();
+        break;
+      case 4: 
+        calibrate();
         break;
       }
     }
