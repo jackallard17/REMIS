@@ -197,12 +197,12 @@ void dashboard()
 
   lcd.setCursor(0, 1);
 
-  if (digitalRead(ROT_SW) == LOW)
+  //if the rotary encoder is turned, enter settings menu
+  if (encoder.read() != prevIndex)
   {
-    submenuVisited = true;
-    lcd.clear();
     settingsMenu();
   }
+
 }
 
 void mainMenu()
@@ -277,7 +277,6 @@ void injectorModeMenu()
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
   bool optionSelected = false;
   int index = 0;
-  lcd.print(injectorModeMenuItems[index]);
 
   delay(100);
 
@@ -354,17 +353,16 @@ void settingsMenu()
   String settingsMenuItems[] = {"Injector Mode", "Flow Rate", "Set Dose", "Calibrate", "Back"};
   bool optionSelected = false;
   int index = 0;
-  lcd.print(settingsMenuItems[index]);
 
   delay(100);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 3; // calculate the index
+    int index = (encoder.read() / 4) % 4; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 3; // wrap around to the last item
+      index += 4; // wrap around to the last item
     }
 
     if (index != prevIndex)
