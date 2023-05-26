@@ -32,15 +32,26 @@ uint8_t mushroom[8] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00100};
+    0b00100
+};
 
-String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagnostics mode is hidden
+byte batteryIcon[8] = {
+  B00100,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B00000
+};
+
+String menuItems[] = {"Settings"}; // debug/diagnostics mode is hidden
 int mainIndex = 0;
 int prevIndex;
 volatile bool submenuVisited = false;
 volatile bool pumpRunning = false;
 volatile bool frequencyUpdated = false;
-
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
@@ -65,6 +76,7 @@ void setup()
   lcd.init();
   lcd.backlight();
   lcd.createChar(0, mushroom);
+  lcd.createChar(1, batteryIcon);
   lcd.setCursor(0, 0);
   lcd.print("REMIS       v0.0");
   lcd.setCursor(0, 12);
@@ -144,7 +156,7 @@ void loop()
 
   if (!pumpRunning)
   {
-    mainMenu();
+    dashboard();
   }
 
   // if the rotary encoder button is held for 5 seconds, enter debug mode
@@ -167,22 +179,43 @@ void loop()
   }
 }
 
+void dashboard()
+{
+  if (submenuVisited)
+  {
+    lcd.clear();
+    submenuVisited = false;
+  }
+
+  //print the current injector mode in the top left corner and the battery percentage in the top right corner
+  lcd.setCursor(0, 0);
+  lcd.print("REMIS");
+  lcd.print("      ");
+  lcd.write((byte)1);
+  lcd.print("100");
+  lcd.print("%");
+
+  lcd.setCursor(0, 1);
+
+  //if the rotary encoder is turned, enter settings menu
+  if (encoder.read() != prevIndex)
+  {
+    settingsMenu();
+  }
+
+}
+
 void mainMenu()
 {
   delay(50); // debounce
+
   if (frequencyUpdated == true)
   {
     writeIntToEEPROM(frequency, 0);
     frequencyUpdated = false;
   }
 
-  if (submenuVisited)
-  {
-    lcd.clear();
-    lcd.print(menuItems[mainIndex]);
-    submenuVisited = false;
-  }
-
+  static int prevMainIndex = -1;
   int mainIndex = (encoder.read() / 4) % 3; // calculate the index
 
   if (mainIndex < 0) // if the index is negative
@@ -190,27 +223,48 @@ void mainMenu()
     mainIndex += 3; // wrap around to the last item
   }
 
-  if (mainIndex != prevIndex)
+  if (mainIndex != prevMainIndex)
   {
     lcd.clear();
-    lcd.print(menuItems[mainIndex]);
-    prevIndex = mainIndex;
+
+    // Display menu items with '>' to mark the selected item
+    if (mainIndex == 0)
+    {
+      lcd.print("> ");
+      lcd.print(menuItems[0]);
+      lcd.setCursor(0, 1);
+      lcd.print("  ");
+      lcd.print(menuItems[1]);
+    }
+    else if (mainIndex == 1)
+    {
+      lcd.print("  ");
+      lcd.print(menuItems[0]);
+      lcd.setCursor(0, 1);
+      lcd.print("> ");
+      lcd.print(menuItems[1]);
+    }
+    else if (mainIndex == 2)
+    {
+      lcd.print("  ");
+      lcd.print(menuItems[1]);
+      lcd.setCursor(0, 1);
+      lcd.print("> ");
+      lcd.print(menuItems[2]);
+    }
+
+    prevMainIndex = mainIndex;
   }
 
   if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
   {
     lcd.clear();
-    submenuVisited = true;
     delay(150);
+    submenuVisited = true;
+
     // enter the submenu for the current menu item
     switch (mainIndex)
     {
-    case 0:
-      injectorModeMenu();
-      break;
-    case 1:
-      flowRateMenu();
-      break;
     case 2:
       settingsMenu();
       break;
@@ -223,7 +277,8 @@ void injectorModeMenu()
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
   bool optionSelected = false;
   int index = 0;
-  lcd.print(injectorModeMenuItems[index]);
+
+  delay(100);
 
   while (!optionSelected)
   {
@@ -237,7 +292,33 @@ void injectorModeMenu()
     if (index != prevIndex)
     {
       lcd.clear();
-      lcd.print(injectorModeMenuItems[index]);
+
+      // Display menu items with '>' to mark the selected item
+      if (index == 0)
+      {
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[1]);
+      }
+      else if (index == 1)
+      {
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[1]);
+      }
+      else if (index == 2)
+      {
+        lcd.print("  ");
+        lcd.print(injectorModeMenuItems[1]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(injectorModeMenuItems[2]);
+      }
+
       prevIndex = index;
     }
 
@@ -257,7 +338,7 @@ void injectorModeMenu()
       }
       else if (index == 2)
       {
-        mainMenu();
+        settingsMenu();
       }
     }
   }
@@ -269,24 +350,67 @@ void flowRateMenu()
 
 void settingsMenu()
 {
-  String settingsMenuItems[] = {"Set Dose", "Calibrate", "Back"};
+  String settingsMenuItems[] = {"Injector Mode", "Flow Rate", "Set Dose", "Calibrate", "Back"};
   bool optionSelected = false;
   int index = 0;
-  lcd.print(settingsMenuItems[index]);
+
+  delay(100);
 
   while (!optionSelected)
   {
-    int index = (encoder.read() / 4) % 3; // calculate the index
+    int index = (encoder.read() / 4) % 4; // calculate the index
 
     if (index < 0) // if the index is negative
     {
-      index += 3; // wrap around to the last item
+      index += 4; // wrap around to the last item
     }
 
     if (index != prevIndex)
     {
       lcd.clear();
-      lcd.print(settingsMenuItems[index]);
+
+      // Display menu items with '>' to mark the selected item
+      if (index == 0)
+      {
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[0]);
+        lcd.setCursor(0, 1);
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[1]);
+      }
+      else if (index == 1)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[1]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[2]);
+      }
+      else if (index == 2)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[2]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[3]);
+      }
+      else if (index == 3)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[3]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[4]);
+      }
+      else if (index == 4)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[4]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[4]);
+      }
+
       prevIndex = index;
     }
 
@@ -294,14 +418,23 @@ void settingsMenu()
     {
       optionSelected = true;
       delay(100);
+      lcd.clear();
       switch (index)
       {
-      case 0: // set dose
+      case 0:
+        injectorModeMenu();
         break;
-      case 1: // calibrate
+      case 1:
+        flowRateMenu();
+        break;
+      case 2:
+        break;
+      case 3:
+        dashboard();
+        break;
+      case 4: 
         calibrate();
-      case 2: // back
-        mainMenu();
+        break;
       }
     }
   }
@@ -476,35 +609,9 @@ float getFlowRate()
 void drawMushrooms()
 {
   lcd.setCursor(0, 1);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
-  delay(100);
-  lcd.write((byte)0);
+  for (int i = 0; i < 16; i++)
+  {
+    lcd.write((byte)0);
+    delay(100);
+  }
 }
