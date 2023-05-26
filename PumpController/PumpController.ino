@@ -32,15 +32,26 @@ uint8_t mushroom[8] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00100};
+    0b00100
+};
 
-String menuItems[] = {"Injector Mode", "Flow Rate", "Settings"}; // debug/diagnostics mode is hidden
+byte batteryIcon[8] = {
+  B00100,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B00000
+};
+
+String menuItems[] = {"Settings"}; // debug/diagnostics mode is hidden
 int mainIndex = 0;
 int prevIndex;
 volatile bool submenuVisited = false;
 volatile bool pumpRunning = false;
 volatile bool frequencyUpdated = false;
-
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
@@ -65,6 +76,7 @@ void setup()
   lcd.init();
   lcd.backlight();
   lcd.createChar(0, mushroom);
+  lcd.createChar(1, batteryIcon);
   lcd.setCursor(0, 0);
   lcd.print("REMIS       v0.0");
   lcd.setCursor(0, 12);
@@ -144,7 +156,7 @@ void loop()
 
   if (!pumpRunning)
   {
-    mainMenu();
+    dashboard();
   }
 
   // if the rotary encoder button is held for 5 seconds, enter debug mode
@@ -164,6 +176,32 @@ void loop()
     {
       debugMode();
     }
+  }
+}
+
+void dashboard()
+{
+  if (submenuVisited)
+  {
+    lcd.clear();
+    submenuVisited = false;
+  }
+
+  //print the current injector mode in the top left corner and the battery percentage in the top right corner
+  lcd.setCursor(0, 0);
+  lcd.print("REMIS");
+  lcd.print("      ");
+  lcd.write((byte)1);
+  lcd.print("100");
+  lcd.print("%");
+
+  lcd.setCursor(0, 1);
+
+  if (digitalRead(ROT_SW) == LOW)
+  {
+    submenuVisited = true;
+    lcd.clear();
+    settingsMenu();
   }
 }
 
@@ -227,15 +265,9 @@ void mainMenu()
     // enter the submenu for the current menu item
     switch (mainIndex)
     {
-      case 0:
-        injectorModeMenu();
-        break;
-      case 1:
-        flowRateMenu();
-        break;
-      case 2:
-        settingsMenu();
-        break;
+    case 2:
+      settingsMenu();
+      break;
     }
   }
 }
@@ -246,6 +278,8 @@ void injectorModeMenu()
   bool optionSelected = false;
   int index = 0;
   lcd.print(injectorModeMenuItems[index]);
+
+  delay(100);
 
   while (!optionSelected)
   {
@@ -305,7 +339,7 @@ void injectorModeMenu()
       }
       else if (index == 2)
       {
-        mainMenu();
+        settingsMenu();
       }
     }
   }
@@ -317,10 +351,12 @@ void flowRateMenu()
 
 void settingsMenu()
 {
-  String settingsMenuItems[] = {"Set Dose", "Calibrate", "Back"};
+  String settingsMenuItems[] = {"Injector Mode", "Flow Rate", "Set Dose", "Calibrate", "Back"};
   bool optionSelected = false;
   int index = 0;
   lcd.print(settingsMenuItems[index]);
+
+  delay(100);
 
   while (!optionSelected)
   {
@@ -360,6 +396,22 @@ void settingsMenu()
         lcd.print("> ");
         lcd.print(settingsMenuItems[2]);
       }
+      else if (index == 3)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[2]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[3]);
+      }
+      else if (index == 4)
+      {
+        lcd.print("  ");
+        lcd.print(settingsMenuItems[3]);
+        lcd.setCursor(0, 1);
+        lcd.print("> ");
+        lcd.print(settingsMenuItems[4]);
+      }
 
       prevIndex = index;
     }
@@ -368,17 +420,23 @@ void settingsMenu()
     {
       optionSelected = true;
       delay(100);
+      lcd.clear();
       switch (index)
       {
-        case 0: // set dose
-          // Add your code for the "Set Dose" functionality here
-          break;
-        case 1: // calibrate
-          calibrate();
-          break;
-        case 2: // back
-          mainMenu();
-          break;
+      case 0:
+        injectorModeMenu();
+        break;
+      case 1:
+        flowRateMenu();
+        break;
+      case 2: // set dose
+        break;
+      case 3: // calibrate
+        calibrate();
+        break;
+      case 4: // back
+        dashboard();
+        break;
       }
     }
   }
