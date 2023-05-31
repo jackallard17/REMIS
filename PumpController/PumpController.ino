@@ -156,6 +156,7 @@ void loop()
 
   if (!pumpRunning)
   {
+    checkInputsAndRunPump();
     dashboard();
   }
 
@@ -274,6 +275,7 @@ void mainMenu()
 
 void injectorModeMenu()
 {
+
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
   bool optionSelected = false;
   int index = 0;
@@ -282,6 +284,8 @@ void injectorModeMenu()
 
   while (!optionSelected)
   {
+    checkInputsAndRunPump();
+
     int index = (encoder.read() / 4) % 3; // calculate the index
 
     if (index < 0) // if the index is negative
@@ -358,6 +362,8 @@ void settingsMenu()
 
   while (!optionSelected)
   {
+    checkInputsAndRunPump();
+
     int index = (encoder.read() / 4) % 4; // calculate the index
 
     if (index < 0) // if the index is negative
@@ -511,6 +517,23 @@ void runPump()
   digitalWrite(STEPPER_STEP, LOW);
   digitalWrite(LED_BUILTIN, LOW);
   delayMicroseconds(step_delay_microseconds);
+}
+
+void checkInputsAndRunPump()
+{
+  if (digitalRead(TRIGGER) == LOW)
+  {
+    runPump();
+  }
+  else
+  {
+    if (pumpRunning) 
+    {
+      lcd.clear();
+    }
+
+    pumpRunning = false;
+  }
 }
 
 void updateFrequency()
