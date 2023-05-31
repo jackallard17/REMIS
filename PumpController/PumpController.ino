@@ -52,6 +52,7 @@ int prevIndex;
 volatile bool submenuVisited = false;
 volatile bool pumpRunning = false;
 volatile bool frequencyUpdated = false;
+volatile bool menuRedrawNeeded = false;
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
@@ -156,6 +157,7 @@ void loop()
 
   if (!pumpRunning)
   {
+    checkInputsAndRunPump();
     dashboard();
   }
 
@@ -205,73 +207,6 @@ void dashboard()
 
 }
 
-void mainMenu()
-{
-  delay(50); // debounce
-
-  if (frequencyUpdated == true)
-  {
-    writeIntToEEPROM(frequency, 0);
-    frequencyUpdated = false;
-  }
-
-  static int prevMainIndex = -1;
-  int mainIndex = (encoder.read() / 4) % 3; // calculate the index
-
-  if (mainIndex < 0) // if the index is negative
-  {
-    mainIndex += 3; // wrap around to the last item
-  }
-
-  if (mainIndex != prevMainIndex)
-  {
-    lcd.clear();
-
-    // Display menu items with '>' to mark the selected item
-    if (mainIndex == 0)
-    {
-      lcd.print("> ");
-      lcd.print(menuItems[0]);
-      lcd.setCursor(0, 1);
-      lcd.print("  ");
-      lcd.print(menuItems[1]);
-    }
-    else if (mainIndex == 1)
-    {
-      lcd.print("  ");
-      lcd.print(menuItems[0]);
-      lcd.setCursor(0, 1);
-      lcd.print("> ");
-      lcd.print(menuItems[1]);
-    }
-    else if (mainIndex == 2)
-    {
-      lcd.print("  ");
-      lcd.print(menuItems[1]);
-      lcd.setCursor(0, 1);
-      lcd.print("> ");
-      lcd.print(menuItems[2]);
-    }
-
-    prevMainIndex = mainIndex;
-  }
-
-  if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
-  {
-    lcd.clear();
-    delay(150);
-    submenuVisited = true;
-
-    // enter the submenu for the current menu item
-    switch (mainIndex)
-    {
-    case 2:
-      settingsMenu();
-      break;
-    }
-  }
-}
-
 void injectorModeMenu()
 {
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
@@ -282,6 +217,8 @@ void injectorModeMenu()
 
   while (!optionSelected)
   {
+    checkInputsAndRunPump();
+
     int index = (encoder.read() / 4) % 3; // calculate the index
 
     if (index < 0) // if the index is negative
@@ -289,9 +226,10 @@ void injectorModeMenu()
       index += 3; // wrap around to the last item
     }
 
-    if (index != prevIndex)
+    if (index != prevIndex || menuRedrawNeeded)
     {
       lcd.clear();
+      menuRedrawNeeded = false;
 
       // Display menu items with '>' to mark the selected item
       if (index == 0)
@@ -358,6 +296,8 @@ void settingsMenu()
 
   while (!optionSelected)
   {
+    checkInputsAndRunPump();
+
     int index = (encoder.read() / 4) % 4; // calculate the index
 
     if (index < 0) // if the index is negative
@@ -365,9 +305,10 @@ void settingsMenu()
       index += 4; // wrap around to the last item
     }
 
-    if (index != prevIndex)
+    if (index != prevIndex || menuRedrawNeeded)
     {
       lcd.clear();
+      menuRedrawNeeded = false;
 
       // Display menu items with '>' to mark the selected item
       if (index == 0)
@@ -511,6 +452,24 @@ void runPump()
   digitalWrite(STEPPER_STEP, LOW);
   digitalWrite(LED_BUILTIN, LOW);
   delayMicroseconds(step_delay_microseconds);
+}
+
+void checkInputsAndRunPump()
+{
+  if (digitalRead(TRIGGER) == LOW)
+  {
+    runPump();
+  }
+  else
+  {
+    if (pumpRunning) 
+    {
+      lcd.clear();
+      menuRedrawNeeded = true;
+    }
+
+    pumpRunning = false;
+  }
 }
 
 void updateFrequency()
