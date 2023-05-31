@@ -52,6 +52,7 @@ int prevIndex;
 volatile bool submenuVisited = false;
 volatile bool pumpRunning = false;
 volatile bool frequencyUpdated = false;
+volatile bool menuRedrawNeeded = false;
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
@@ -225,9 +226,10 @@ void injectorModeMenu()
       index += 3; // wrap around to the last item
     }
 
-    if (index != prevIndex)
+    if (index != prevIndex || menuRedrawNeeded)
     {
       lcd.clear();
+      menuRedrawNeeded = false;
 
       // Display menu items with '>' to mark the selected item
       if (index == 0)
@@ -303,9 +305,10 @@ void settingsMenu()
       index += 4; // wrap around to the last item
     }
 
-    if (index != prevIndex)
+    if (index != prevIndex || menuRedrawNeeded)
     {
       lcd.clear();
+      menuRedrawNeeded = false;
 
       // Display menu items with '>' to mark the selected item
       if (index == 0)
@@ -462,6 +465,7 @@ void checkInputsAndRunPump()
     if (pumpRunning) 
     {
       lcd.clear();
+      menuRedrawNeeded = true;
     }
 
     pumpRunning = false;
