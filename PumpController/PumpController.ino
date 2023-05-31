@@ -206,76 +206,8 @@ void dashboard()
 
 }
 
-void mainMenu()
-{
-  delay(50); // debounce
-
-  if (frequencyUpdated == true)
-  {
-    writeIntToEEPROM(frequency, 0);
-    frequencyUpdated = false;
-  }
-
-  static int prevMainIndex = -1;
-  int mainIndex = (encoder.read() / 4) % 3; // calculate the index
-
-  if (mainIndex < 0) // if the index is negative
-  {
-    mainIndex += 3; // wrap around to the last item
-  }
-
-  if (mainIndex != prevMainIndex)
-  {
-    lcd.clear();
-
-    // Display menu items with '>' to mark the selected item
-    if (mainIndex == 0)
-    {
-      lcd.print("> ");
-      lcd.print(menuItems[0]);
-      lcd.setCursor(0, 1);
-      lcd.print("  ");
-      lcd.print(menuItems[1]);
-    }
-    else if (mainIndex == 1)
-    {
-      lcd.print("  ");
-      lcd.print(menuItems[0]);
-      lcd.setCursor(0, 1);
-      lcd.print("> ");
-      lcd.print(menuItems[1]);
-    }
-    else if (mainIndex == 2)
-    {
-      lcd.print("  ");
-      lcd.print(menuItems[1]);
-      lcd.setCursor(0, 1);
-      lcd.print("> ");
-      lcd.print(menuItems[2]);
-    }
-
-    prevMainIndex = mainIndex;
-  }
-
-  if (digitalRead(ROT_SW) == LOW) // if rotary button pressed:
-  {
-    lcd.clear();
-    delay(150);
-    submenuVisited = true;
-
-    // enter the submenu for the current menu item
-    switch (mainIndex)
-    {
-    case 2:
-      settingsMenu();
-      break;
-    }
-  }
-}
-
 void injectorModeMenu()
 {
-
   String injectorModeMenuItems[] = {"Continuous", "Dose Mode", "Back"};
   bool optionSelected = false;
   int index = 0;
