@@ -4,12 +4,17 @@
 #include <EEPROM.h>
 #include "Arduino.h"
 
-int getRPM();
+class Memory
+{
+public:
+    int getRPM();
 
-float getFlowRate();
+    float getFlowRate();
 
-private void writeIntToEEPROM(int value, int address);
+private:
+    void writeIntToEEPROM(int value, int address);
 
-private int readIntFromEEPROM(int address);
+    int readIntFromEEPROM(int address);
+};
 
 #endif

@@ -1,29 +1,14 @@
-#include <Pump.h>
-#include <../Pins.h>
+#include "Pump.h"
+#include "../Pins.h"
 
 LiquidCrystal_I2C lcd(0x27, 2, 16);
 Encoder encoder(2, 3);
 
-
 #define STEPS 200
-
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
-// persistent properties, stored between power cycles
-float frequency;  // frequency of the pump in Hz
-int injectorMode; // 0 = toggle, 1 = continuous, 2 = dose mode
-int dose;         // dose amount in mL
-
-float period;
-long step_delay_microseconds;
-
-float ml_per_rev = 200;
-
-volatile int last_CLK_state = LOW;
-volatile int last_DT_state = LOW;
-
-void setup()
+void Pump::setup()
 {
   Serial.begin(9600);
 
@@ -75,7 +60,7 @@ void setup()
   digitalWrite(10, HIGH);
 }
 
-void loop()
+void Pump::loop()
 {
   // manual mode is triggered by the toggle switch
   if (digitalRead(TOGGLE) == LOW)
@@ -135,8 +120,7 @@ void loop()
   }
 }
 
-
-void calibrate()
+void Pump::calibrate()
 {
   bool calibrating = true;
   bool dispensing = false;
@@ -188,7 +172,7 @@ void calibrate()
 
 // run the pump in manual mode, triggered by the toggle switch
 //  pump frequency is set by frequency variable
-void runPump()
+void Pump::runPump()
 {
   if (pumpRunning == false)
   {
@@ -209,7 +193,7 @@ void runPump()
   delayMicroseconds(step_delay_microseconds);
 }
 
-void checkInputsAndRunPump()
+void Pump::checkInputsAndRunPump()
 {
   if (digitalRead(TRIGGER) == LOW)
   {
@@ -227,7 +211,7 @@ void checkInputsAndRunPump()
   }
 }
 
-void updateFrequency()
+void Pump::updateFrequency()
 {
   if (pumpRunning)
   {

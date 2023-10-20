@@ -1,14 +1,20 @@
-#include <Pins.h>
-#include <Memory/Memory.h>
-#include <Pump/Pump.h>
-#include <UI/UI.h>
+#include "Pins.h"
+
+#include "Memory/Memory.h"
+#include "Memory/Memory.cpp"
+
+#include "Pump/Pump.h"
+#include "Pump/Pump.cpp"
+
+#include "UI/UI.h"
+#include "UI/UI.cpp"
+
 
 UI ui;
 
 void setup()
 {
-    ui = new UI();
-
+    ui.drawMushrooms();
 }
 
 void loop()

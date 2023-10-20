@@ -2,28 +2,32 @@
 #define UI_H
 
 #include "LiquidCrystal_I2C.h"
+#include "Encoder.h"
 
-class UI
-{
+    class UI
+    {
+    public:
+        UI();
 
-    string menuItems[];
-    int mainIndex;
-    int prevIndex;
-    volatile bool submenuVisited;
-    volatile bool pumpRunning;
-    volatile bool frequencyUpdated;
-    volatile bool menuRedrawNeeded;
+        void drawMushrooms();
 
-    UI();
+        void dashboard();
 
-    void drawMushrooms();
+        void injectorModeMenu();
 
-    void dashboard();
+        void flowRateMenu();
 
-    void injectorModeMenu();
+        void settingsMenu();
 
-    void settingsMenu();
+        void debugMode();
 
-    void debugMode();
-}
+    private:
+        int mainIndex;
+        int prevIndex;
+        volatile bool submenuVisited;
+        volatile bool pumpRunning;
+        volatile bool frequencyUpdated;
+        volatile bool menuRedrawNeeded;
+    };
+
 #endif
