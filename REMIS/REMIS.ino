@@ -248,7 +248,7 @@ byte batteryIcon[8] = {
     lcd.createChar(0, mushroom);
     lcd.createChar(1, batteryIcon);
     lcd.setCursor(0, 0);
-    lcd.print("REMIS       v0.0");
+    lcd.print("REMIS       v0.5");
     lcd.setCursor(0, 12);
     drawMushrooms();
     nav.idleOn(idle);
