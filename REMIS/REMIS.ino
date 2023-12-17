@@ -1,16 +1,5 @@
 #include <Arduino.h>
 
-/********************
-Arduino generic menu system
-Arduino menu on I2C LCD example
-http://www.r-site.net/?at=//op%5B%40id=%273090%27%5D
-
-Sep.2014 Rui Azevedo - ruihfazevedo(@rrob@)gmail.com
-
-LCD library:
-https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
-http://playground.arduino.cc/Code/LCD3wires
-*/
 #ifndef ARDUINO_SAM_DUE
 
   #include <Wire.h>
@@ -21,6 +10,32 @@ http://playground.arduino.cc/Code/LCD3wires
   #include <menuIO/encoderIn.h>//quadrature encoder driver and fake stream
   #include <menuIO/keyIn.h>//keyboard driver and fake stream (for the encoder button)
   #include <menuIO/chainStream.h>// concatenate multiple input streams (this allows adding a button to the encoder)
+  #include <Stepper.h>
+
+  // globals
+  #define STEPPER_STEP 5
+  #define STEPPER_DIR 9
+
+  #define LCD_SDA 22
+  #define LCD_SDL 21
+
+  #define TOGGLESWITCH 8
+  #define TRIGGER 9
+
+  #define STEPS 200
+
+  volatile bool pumpRunning = false;
+  volatile bool frequencyUpdated = false;
+
+  float period;
+  long step_delay_microseconds;
+
+  float ml_per_rev = 200;
+
+  volatile int last_CLK_state = LOW;
+  volatile int last_DT_state = LOW;
+
+  Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
   uint8_t mushroom[8] = {
     0b00000,
