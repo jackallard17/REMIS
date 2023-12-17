@@ -79,7 +79,7 @@ byte batteryIcon[8] = {
     return proceed;
   }
 
-  int test=55;
+  int test=420;
 
   result action1(eventMask e,navNode& nav, prompt &item) {
     Serial.print("action1 event: ");
@@ -97,20 +97,12 @@ byte batteryIcon[8] = {
     return quit;
   }
 
-  int ledCtrl=LOW;
+  int injectorMode=1;
 
-  result myLedOn() {
-    ledCtrl=HIGH;
-    return proceed;
-  }
-  result myLedOff() {
-    ledCtrl=LOW;
-    return proceed;
-  }
-
-  TOGGLE(ledCtrl,setLed,"Led: ",doNothing,noEvent,noStyle//,doExit,enterEvent,noStyle
-    ,VALUE("On",HIGH,doNothing,noEvent)
-    ,VALUE("Off",LOW,doNothing,noEvent)
+  TOGGLE(injectorMode,setInjectorMode,"Mode: ",doNothing,noEvent,noStyle//,doExit,enterEvent,noStyle
+    ,VALUE("Dose",0,doNothing,noEvent)
+    ,VALUE("Cont.",1,doNothing,noEvent)
+    ,VALUE("Toggle.",2,doNothing,noEvent)
   );
 
   int selTest=0;
@@ -138,7 +130,7 @@ byte batteryIcon[8] = {
     }
   };
 
-  MENU(subMenu,"Sub-Menu",showEvent,anyEvent,noStyle
+  MENU(subMenu,"",showEvent,anyEvent,noStyle
     ,OP("Sub1",showEvent,anyEvent)
     ,OP("Sub2",showEvent,anyEvent)
     ,OP("Sub3",showEvent,anyEvent)
@@ -158,11 +150,11 @@ byte batteryIcon[8] = {
 
   MENU(mainMenu,"Main menu",doNothing,noEvent,wrapStyle
     // ,OP("Op1",action1,anyEvent)
-    // ,OP("Op2",action2,enterEvent)
     // //,SUBMENU(togOp)
-    ,FIELD(test,"Test","%",0,100,10,1,doNothing,noEvent,wrapStyle)
-    // ,SUBMENU(subMenu)
-    ,SUBMENU(setLed)
+    ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,wrapStyle)
+    ,SUBMENU(subMenu)
+    ,OP("Calibrate",action2,enterEvent)
+    ,SUBMENU(setInjectorMode)
     // ,OP("LED On",myLedOn,enterEvent)
     // ,OP("LED Off",myLedOff,enterEvent)
     // ,SUBMENU(selMenu)
@@ -205,11 +197,31 @@ byte batteryIcon[8] = {
   }
 
   result idle(menuOut& o,idleEvent e) {
-    switch(e) {
-      case idleStart:o.print("suspending menu!");break;
-      case idling:o.print("suspended...");break;
-      case idleEnd:o.print("resuming menu.");break;
+    lcd.setCursor(0, 0);
+    //print REMIS on left side of screen and battery icon on right
+    o.print("REMIS");
+    o.setCursor(15, 0);
+    o.write(1);
+
+    // on the next line, display the current mode on left and rpm on right
+    o.setCursor(0, 1);
+    //if else block to print the textual injector mode, 0 = dose, 1 = continuous, 2 = toggle
+    if (injectorMode == 0) {
+      o.print("Dose");
+    } else if (injectorMode == 1) {
+      o.print("Cont.");
+    } else if (injectorMode == 2) {
+      o.print("Toggle");
     }
+    o.setCursor(10, 1);
+    o.print(test);
+    o.print("RPM");
+
+    // switch(e) {
+    //   case idleStart:o.print("suspending menu!");break;
+    //   case idling:o.print("suspended...");break;
+    //   case idleEnd:o.print("resuming menu.");break;
+    // }
     return proceed;
   }
 
@@ -239,11 +251,11 @@ byte batteryIcon[8] = {
     lcd.print("REMIS       v0.0");
     lcd.setCursor(0, 12);
     drawMushrooms();
+    nav.idleOn(idle);
   }
 
   void loop() {
     nav.poll();
-    digitalWrite(LEDPIN, ledCtrl);
     delay(100);//simulate a delay as if other tasks are running
   }
 
