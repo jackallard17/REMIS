@@ -37,6 +37,10 @@
 
   Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
 
+  // persistent properties, stored between power cycles
+  float frequency;  // frequency of the pump in Hz
+  int dose;         // dose amount in mL
+
   uint8_t mushroom[8] = {
     0b00000,
     0b00100,
@@ -250,6 +254,33 @@ byte batteryIcon[8] = {
   }
 }
 
+void runPump()
+{
+  if (pumpRunning == false)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Pump Running...");
+    lcd.setCursor(0, 1);
+    lcd.print(getRPM());
+    lcd.print(" RPM");
+    pumpRunning = true;
+  }
+
+  digitalWrite(STEPPER_STEP, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delayMicroseconds(step_delay_microseconds);
+  digitalWrite(STEPPER_STEP, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
+  delayMicroseconds(step_delay_microseconds);
+}
+
+int getRPM()
+{
+  float rpmFloat = (frequency * 60.0) / 200.0;
+  return (int)rpmFloat;
+}
+
   void setup() {
     pinMode(encBtn,INPUT_PULLUP);
     pinMode(LEDPIN,OUTPUT);
@@ -270,6 +301,14 @@ byte batteryIcon[8] = {
   }
 
   void loop() {
+    // if (digitalRead(TOGGLESWITCH) == LOW)
+    // {
+    //   runPump();
+    // }
+    // else if (digitalRead(TRIGGER) == LOW && injectorMode == 0)
+    // {
+    //   runPump();
+    // }
     nav.poll();
     delay(100);//simulate a delay as if other tasks are running
   }
