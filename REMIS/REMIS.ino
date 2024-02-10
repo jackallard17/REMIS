@@ -258,12 +258,7 @@ void runPump()
 {
   if (pumpRunning == false)
   {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Pump Running...");
-    lcd.setCursor(0, 1);
-    lcd.print(getRPM());
-    lcd.print(" RPM");
+    displayPumpRunning();
     pumpRunning = true;
   }
 
@@ -273,6 +268,21 @@ void runPump()
   digitalWrite(STEPPER_STEP, LOW);
   digitalWrite(LED_BUILTIN, LOW);
   delayMicroseconds(step_delay_microseconds);
+}
+
+void displayPumpRunning()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Pump Running...");
+}
+
+void stopPump()
+{
+  if (pumpRunning)
+  {
+    pumpRunning = false;
+  }
 }
 
 int getRPM()
@@ -298,19 +308,22 @@ int getRPM()
     lcd.setCursor(0, 12);
     drawMushrooms();
     nav.idleOn(idle);
+
+    step_delay_microseconds = 500;
   }
 
   void loop() {
-    // if (digitalRead(TOGGLESWITCH) == LOW)
-    // {
-    //   runPump();
-    // }
-    // else if (digitalRead(TRIGGER) == LOW && injectorMode == 0)
-    // {
-    //   runPump();
-    // }
     nav.poll();
-    delay(100);//simulate a delay as if other tasks are running
+
+    if (digitalRead(TOGGLESWITCH) == LOW)
+    {
+      // runPump();
+    }
+    else if (digitalRead(TOGGLESWITCH) == HIGH)
+    {
+      pumpRunning = false;
+      nav.idleOn(idle);
+    }
   }
 
 #endif
