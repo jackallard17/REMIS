@@ -167,13 +167,13 @@ byte batteryIcon[8] = {
   char* constMEM hexNr[] MEMMODE={"0","x",hexDigit,hexDigit};
   char buf1[]="0x11";
 
-  MENU(mainMenu,"Main menu",doNothing,noEvent,wrapStyle
-    ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,wrapStyle)
-    ,SUBMENU(subMenu)
+  MENU(mainMenu,"Main menu",doNothing,noEvent,noStyle
+    ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,noStyle)
     ,OP("Calibrate",action2,enterEvent)
     ,SUBMENU(setInjectorMode)
     ,EXIT("<Back")
   );
+    //,SUBMENU(subMenu)
     // ,OP("Op1",action1,anyEvent)
     // //,SUBMENU(togOp)
     // ,OP("LED On",myLedOn,enterEvent)
@@ -317,7 +317,7 @@ int getRPM()
 
     if (digitalRead(TOGGLESWITCH) == LOW)
     {
-      runPump();
+      // runPump();
     }
     else if (digitalRead(TOGGLESWITCH) == HIGH)
     {
