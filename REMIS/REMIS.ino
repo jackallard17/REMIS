@@ -168,20 +168,20 @@ byte batteryIcon[8] = {
   char buf1[]="0x11";
 
   MENU(mainMenu,"Main menu",doNothing,noEvent,wrapStyle
-    // ,OP("Op1",action1,anyEvent)
-    // //,SUBMENU(togOp)
     ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,wrapStyle)
     ,SUBMENU(subMenu)
     ,OP("Calibrate",action2,enterEvent)
     ,SUBMENU(setInjectorMode)
+    ,EXIT("<Back")
+  );
+    // ,OP("Op1",action1,anyEvent)
+    // //,SUBMENU(togOp)
     // ,OP("LED On",myLedOn,enterEvent)
     // ,OP("LED Off",myLedOff,enterEvent)
     // ,SUBMENU(selMenu)
     // ,SUBMENU(chooseMenu)
     // ,OP("Alert test",doAlert,enterEvent)
     // ,EDIT("Hex",buf1,hexNr,doNothing,noEvent,noStyle)
-    ,EXIT("<Back")
-  );
 
   #define MAX_DEPTH 2
 
@@ -317,7 +317,7 @@ int getRPM()
 
     if (digitalRead(TOGGLESWITCH) == LOW)
     {
-      // runPump();
+      runPump();
     }
     else if (digitalRead(TOGGLESWITCH) == HIGH)
     {
