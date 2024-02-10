@@ -169,10 +169,12 @@ byte batteryIcon[8] = {
 
   MENU(mainMenu,"Main menu",doNothing,noEvent,noStyle
     ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,noStyle)
-    ,OP("Calibrate",action2,enterEvent)
+    ,OP("================",doAlert,enterEvent)
     ,SUBMENU(setInjectorMode)
+    ,OP("Calibrate",doAlert,enterEvent)
     ,EXIT("<Back")
   );
+    //,OP("Calibrate",action2,focusEvent)
     //,SUBMENU(subMenu)
     // ,OP("Op1",action1,anyEvent)
     // //,SUBMENU(togOp)
