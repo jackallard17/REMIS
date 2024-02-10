@@ -256,9 +256,9 @@ byte batteryIcon[8] = {
 
 void runPump()
 {
+  lcd.clear();
   if (pumpRunning == false)
   {
-    lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Pump Running...");
     lcd.setCursor(0, 1);
@@ -301,14 +301,10 @@ int getRPM()
   }
 
   void loop() {
-    // if (digitalRead(TOGGLESWITCH) == LOW)
-    // {
-    //   runPump();
-    // }
-    // else if (digitalRead(TRIGGER) == LOW && injectorMode == 0)
-    // {
-    //   runPump();
-    // }
+    if (digitalRead(TOGGLESWITCH) == LOW)
+    {
+      runPump();
+    }
     nav.poll();
     delay(100);//simulate a delay as if other tasks are running
   }
