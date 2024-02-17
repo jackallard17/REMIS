@@ -66,22 +66,19 @@ byte batteryIcon[8] = {
 
   using namespace Menu;
 
-  //LiquidCrystal_I2C lcd(0x27);//, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
   LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address and pinout
 
-  // Encoder /////////////////////////////////////
+  // Encoder
   #define encA 2
   #define encB 3
-  //this encoder has a button here
   #define encBtn 4
 
-  encoderIn<encA,encB> encoder;//simple quad encoder driver
+  encoderIn<encA,encB> encoder;
   #define ENC_SENSIVITY 4
-  encoderInStream<encA,encB> encStream(encoder,ENC_SENSIVITY);// simple quad encoder fake Stream
+  encoderInStream<encA,encB> encStream(encoder,ENC_SENSIVITY);
 
-  //a keyboard with only one key as the encoder button
-  keyMap encBtn_map[]={{-encBtn,defaultNavCodes[enterCmd].ch}};//negative pin numbers use internal pull-up, this is on when low
-  keyIn<1> encButton(encBtn_map);//1 is the number of keys
+  keyMap encBtn_map[]={{-encBtn,defaultNavCodes[enterCmd].ch}};
+  keyIn<1> encButton(encBtn_map);
 
   serialIn serial(Serial);
 
@@ -140,8 +137,6 @@ byte batteryIcon[8] = {
     ,VALUE("Last",-1,doNothing,noEvent)
   );
 
-  //customizing a prompt look!
-  //by extending the prompt class
   class altPrompt:public prompt {
   public:
     altPrompt(constMEM promptShadow& p):prompt(p) {}
@@ -158,12 +153,6 @@ byte batteryIcon[8] = {
     ,EXIT("<Back")
   );
 
-  /*extern menu mainMenu;
-  TOGGLE((mainMenu[1].enabled),togOp,"Op 2:",doNothing,noEvent,noStyle
-    ,VALUE("Enabled",enabledStatus,doNothing,noEvent)
-    ,VALUE("disabled",disabledStatus,doNothing,noEvent)
-  );*/
-
   char* constMEM hexDigit MEMMODE="0123456789ABCDEF";
   char* constMEM hexNr[] MEMMODE={"0","x",hexDigit,hexDigit};
   char buf1[]="0x11";
@@ -175,27 +164,8 @@ byte batteryIcon[8] = {
     ,OP("Calibrate",doCalibration,enterEvent)
     ,EXIT("<Back")
   );
-    //,OP("Calibrate",action2,focusEvent)
-    //,SUBMENU(subMenu)
-    // ,OP("Op1",action1,anyEvent)
-    // //,SUBMENU(togOp)
-    // ,OP("LED On",myLedOn,enterEvent)
-    // ,OP("LED Off",myLedOff,enterEvent)
-    // ,SUBMENU(selMenu)
-    // ,SUBMENU(chooseMenu)
-    // ,OP("Alert test",doAlert,enterEvent)
-    // ,EDIT("Hex",buf1,hexNr,doNothing,noEvent,noStyle)
 
   #define MAX_DEPTH 2
-
-  /*const panel panels[] MEMMODE={{0,0,16,2}};
-  navNode* nodes[sizeof(panels)/sizeof(panel)];
-  panelsList pList(panels,nodes,1);
-  idx_t tops[MAX_DEPTH];
-  lcdOut outLCD(&lcd,tops,pList);//output device for LCD
-  menuOut* constMEM outputs[] MEMMODE={&outLCD};//list of output devices
-  outputsList out(outputs,1);//outputs list with 2 outputs
-  */
 
   MENU_OUTPUTS(out,MAX_DEPTH
     ,LCD_OUT(lcd,{0,0,16,2})
@@ -214,8 +184,6 @@ byte batteryIcon[8] = {
   }
 
 result doCalibration(eventMask e, prompt &item) {
-    // nav.idleOn(alert);
-
     bool calibrationComplete = false;
 
     lcd.clear();
@@ -234,14 +202,11 @@ result doCalibration(eventMask e, prompt &item) {
 
   result idle(menuOut& o,idleEvent e) {
     lcd.setCursor(0, 0);
-    //print REMIS on left side of screen and battery icon on right
     o.print("REMIS");
     o.setCursor(15, 0);
     o.write(1);
 
-    // on the next line, display the current mode on left and rpm on right
     o.setCursor(0, 1);
-    //if else block to print the textual injector mode, 0 = dose, 1 = continuous, 2 = toggle
     if (injectorMode == 0) {
       o.print("Dose");
     } else if (injectorMode == 1) {
@@ -253,11 +218,6 @@ result doCalibration(eventMask e, prompt &item) {
     o.print(test);
     o.print("RPM");
 
-    // switch(e) {
-    //   case idleStart:o.print("suspending menu!");break;
-    //   case idling:o.print("suspended...");break;
-    //   case idleEnd:o.print("resuming menu.");break;
-    // }
     return proceed;
   }
 
@@ -366,16 +326,6 @@ int getRPM()
     {
       showDashboard();
     }
-
-    // if (digitalRead(TOGGLESWITCH) == LOW)
-    // {
-    //   // runPump();
-    // }
-    // else if (digitalRead(TOGGLESWITCH) == HIGH)
-    // {
-    //   pumpRunning = false;
-    //   nav.idleOn(idle);
-    // }
   }
 
 #endif
