@@ -24,6 +24,8 @@
 
   #define STEPS 200
 
+  #define MAX_DEPTH 2
+
   volatile bool pumpRunning = false;
   volatile bool dashboardDisplayed = true;
   volatile bool frequencyUpdated = false;
@@ -85,8 +87,6 @@ byte batteryIcon[8] = {
   //input from the encoder + encoder button + serial
   menuIn* inputsList[]={&encStream,&encButton,&serial};
   chainStream<3> in(inputsList);//3 is the number of inputs
-
-  #define LEDPIN A3
 
   result doCalibration(eventMask e, prompt &item);
 
@@ -164,8 +164,6 @@ byte batteryIcon[8] = {
     ,OP("Calibrate",doCalibration,enterEvent)
     ,EXIT("<Back")
   );
-
-  #define MAX_DEPTH 2
 
   MENU_OUTPUTS(out,MAX_DEPTH
     ,LCD_OUT(lcd,{0,0,16,2})
@@ -291,7 +289,6 @@ int getRPM()
 
   void setup() {
     pinMode(encBtn,INPUT_PULLUP);
-    pinMode(LEDPIN,OUTPUT);
     Serial.begin(115200);
     while(!Serial);
     encoder.begin();
@@ -299,12 +296,14 @@ int getRPM()
     nav.idleTask=idle;//point a function to be used when menu is suspended
     mainMenu[1].enabled=disabledStatus;
     nav.showTitle=false;
+
     lcd.createChar(0, mushroom);
     lcd.createChar(1, batteryIcon);
     lcd.setCursor(0, 0);
     lcd.print("REMIS       v0.5");
     lcd.setCursor(0, 12);
     drawMushrooms();
+
     nav.idleOn(idle);
 
     step_delay_microseconds = 500;
