@@ -16,6 +16,11 @@
   #define STEPPER_STEP 5
   #define STEPPER_DIR 9
 
+  // Digital pins D2 - D7
+  #define ROT_CLK 2 // rotary encoder clock
+  #define ROT_DT 3  // rotary encoder direction
+  #define ROT_SW 4  // rotary encoder switch (press in)
+
   #define LCD_SDA 22
   #define LCD_SDL 21
 
@@ -221,8 +226,13 @@ result doCalibration(eventMask e, prompt &item) {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Dispense 100mL");
-    lcd.setCursor(1, 0);
-    lcd.print("(Press to cancel)");
+    lcd.setCursor(0, 1);
+    lcd.print("Press to cancel");
+
+    if (digitalRead(encBtn) == LOW)
+    {
+      nav.idleOn(idle);
+    }
 
     while (!calibrationComplete)
     {
@@ -329,7 +339,44 @@ int getRPM()
   return (int)rpmFloat;
 }
 
-  void setup() {
+void debugMode()
+{
+  // print debug mode on screen
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Debug Mode");
+
+  delay(1000);
+  lcd.clear();
+
+  while (true)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    lcd.print(digitalRead(TOGGLESWITCH));
+
+    lcd.setCursor(10, 0);
+    lcd.print("Tr:");
+    lcd.print(digitalRead(TRIGGER));
+
+    lcd.setCursor(0, 1);
+    lcd.print("RC:");                // rotary code (raw binary)
+    lcd.print(digitalRead(ROT_CLK)); // clk
+    lcd.print(digitalRead(ROT_DT));  // dt
+    lcd.print(digitalRead(ROT_SW));  // sw
+
+    delay(100);
+
+    if (digitalRead(ROT_SW) == LOW)
+    {
+      break;
+    }
+  }
+}
+
+  void setup() 
+  {
     pinMode(encBtn,INPUT_PULLUP);
     pinMode(LEDPIN,OUTPUT);
     Serial.begin(115200);
@@ -361,6 +408,25 @@ int getRPM()
 
   void loop() {
     nav.poll();
+
+    // if the rotary encoder button is held for 5 seconds, enter debug mode
+  if (digitalRead(ROT_SW) == LOW)
+  {
+    int i = 0;
+    while (i < 500)
+    {
+      if (digitalRead(ROT_SW) == HIGH)
+      {
+        break;
+      }
+      delay(10);
+      i++;
+    }
+    if (i == 500)
+    {
+      debugMode();
+    }
+  }
 
     if (!checkPumpInputs())
     {
