@@ -16,6 +16,11 @@
   #define STEPPER_STEP 5
   #define STEPPER_DIR 9
 
+  // Digital pins D2 - D7
+  #define ROT_CLK 2 // rotary encoder clock
+  #define ROT_DT 3  // rotary encoder direction
+  #define ROT_SW 4  // rotary encoder switch (press in)
+
   #define LCD_SDA 22
   #define LCD_SDL 21
 
@@ -25,6 +30,7 @@
   #define STEPS 200
 
   volatile bool pumpRunning = false;
+  volatile bool dashboardDisplayed = true;
   volatile bool frequencyUpdated = false;
 
   float period;
@@ -90,7 +96,7 @@ byte batteryIcon[8] = {
 
   #define LEDPIN A3
 
-  result doAlert(eventMask e, prompt &item);
+  result doCalibration(eventMask e, prompt &item);
 
   result showEvent(eventMask e,navNode& nav,prompt& item) {
     Serial.print("event: ");
@@ -169,9 +175,9 @@ byte batteryIcon[8] = {
 
   MENU(mainMenu,"Main menu",doNothing,noEvent,noStyle
     ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,noStyle)
-    ,OP("================",doAlert,enterEvent)
+    ,OP("================",doNothing,enterEvent)
     ,SUBMENU(setInjectorMode)
-    ,OP("Calibrate",doAlert,enterEvent)
+    ,OP("Calibrate",doCalibration,enterEvent)
     ,EXIT("<Back")
   );
     //,OP("Calibrate",action2,focusEvent)
@@ -212,8 +218,27 @@ byte batteryIcon[8] = {
     return proceed;
   }
 
-  result doAlert(eventMask e, prompt &item) {
-    nav.idleOn(alert);
+result doCalibration(eventMask e, prompt &item) {
+    // nav.idleOn(alert);
+
+    bool calibrationComplete = false;
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Dispense 100mL");
+    lcd.setCursor(0, 1);
+    lcd.print("Press to cancel");
+
+    if (digitalRead(encBtn) == LOW)
+    {
+      nav.idleOn(idle);
+    }
+
+    while (!calibrationComplete)
+    {
+      checkPumpInputs();
+    }
+
     return proceed;
   }
 
@@ -256,12 +281,36 @@ byte batteryIcon[8] = {
   }
 }
 
+bool checkPumpInputs()
+{
+  if (digitalRead(TOGGLESWITCH) == HIGH)
+  {
+    runPump();
+  }
+  else if (digitalRead(TOGGLESWITCH) == LOW)
+  {
+    stopPump();
+  }
+
+  if (digitalRead(TRIGGER) == HIGH)
+  {
+    runPump();
+  }
+  else if (digitalRead(TRIGGER) == LOW)
+  {
+    stopPump();
+  }
+
+  return false;
+}
+
 void runPump()
 {
   if (pumpRunning == false)
   {
     displayPumpRunning();
     pumpRunning = true;
+    dashboardDisplayed = false;
   }
 
   digitalWrite(STEPPER_STEP, HIGH);
@@ -281,10 +330,7 @@ void displayPumpRunning()
 
 void stopPump()
 {
-  if (pumpRunning)
-  {
-    pumpRunning = false;
-  }
+  pumpRunning = false;
 }
 
 int getRPM()
@@ -293,7 +339,44 @@ int getRPM()
   return (int)rpmFloat;
 }
 
-  void setup() {
+void debugMode()
+{
+  // print debug mode on screen
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Debug Mode");
+
+  delay(1000);
+  lcd.clear();
+
+  while (true)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    lcd.print(digitalRead(TOGGLESWITCH));
+
+    lcd.setCursor(10, 0);
+    lcd.print("Tr:");
+    lcd.print(digitalRead(TRIGGER));
+
+    lcd.setCursor(0, 1);
+    lcd.print("RC:");                // rotary code (raw binary)
+    lcd.print(digitalRead(ROT_CLK)); // clk
+    lcd.print(digitalRead(ROT_DT));  // dt
+    lcd.print(digitalRead(ROT_SW));  // sw
+
+    delay(100);
+
+    if (digitalRead(ROT_SW) == LOW)
+    {
+      break;
+    }
+  }
+}
+
+  void setup() 
+  {
     pinMode(encBtn,INPUT_PULLUP);
     pinMode(LEDPIN,OUTPUT);
     Serial.begin(115200);
@@ -314,18 +397,51 @@ int getRPM()
     step_delay_microseconds = 500;
   }
 
+  void showDashboard()
+  {
+    if (!dashboardDisplayed)
+    {
+      nav.idleOn(idle);
+      dashboardDisplayed = true;
+    }
+  }
+
   void loop() {
     nav.poll();
 
-    if (digitalRead(TOGGLESWITCH) == LOW)
+    // if the rotary encoder button is held for 5 seconds, enter debug mode
+  if (digitalRead(ROT_SW) == LOW)
+  {
+    int i = 0;
+    while (i < 500)
     {
-      // runPump();
+      if (digitalRead(ROT_SW) == HIGH)
+      {
+        break;
+      }
+      delay(10);
+      i++;
     }
-    else if (digitalRead(TOGGLESWITCH) == HIGH)
+    if (i == 500)
     {
-      pumpRunning = false;
-      nav.idleOn(idle);
+      debugMode();
     }
+  }
+
+    if (!checkPumpInputs())
+    {
+      showDashboard();
+    }
+
+    // if (digitalRead(TOGGLESWITCH) == LOW)
+    // {
+    //   // runPump();
+    // }
+    // else if (digitalRead(TOGGLESWITCH) == HIGH)
+    // {
+    //   pumpRunning = false;
+    //   nav.idleOn(idle);
+    // }
   }
 
 #endif
