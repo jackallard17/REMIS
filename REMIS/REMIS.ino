@@ -25,6 +25,7 @@
   #define STEPS 200
 
   volatile bool pumpRunning = false;
+  volatile bool dashboardDisplayed = true;
   volatile bool frequencyUpdated = false;
 
   float period;
@@ -90,7 +91,7 @@ byte batteryIcon[8] = {
 
   #define LEDPIN A3
 
-  result doAlert(eventMask e, prompt &item);
+  result doCalibration(eventMask e, prompt &item);
 
   result showEvent(eventMask e,navNode& nav,prompt& item) {
     Serial.print("event: ");
@@ -169,9 +170,9 @@ byte batteryIcon[8] = {
 
   MENU(mainMenu,"Main menu",doNothing,noEvent,noStyle
     ,FIELD(test,"Speed: ","RPM",0,500,10,1,doNothing,noEvent,noStyle)
-    ,OP("================",doAlert,enterEvent)
+    ,OP("================",doNothing,enterEvent)
     ,SUBMENU(setInjectorMode)
-    ,OP("Calibrate",doAlert,enterEvent)
+    ,OP("Calibrate",doCalibration,enterEvent)
     ,EXIT("<Back")
   );
     //,OP("Calibrate",action2,focusEvent)
@@ -212,8 +213,22 @@ byte batteryIcon[8] = {
     return proceed;
   }
 
-  result doAlert(eventMask e, prompt &item) {
-    nav.idleOn(alert);
+result doCalibration(eventMask e, prompt &item) {
+    // nav.idleOn(alert);
+
+    bool calibrationComplete = false;
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Dispense 100mL");
+    lcd.setCursor(1, 0);
+    lcd.print("(Press to cancel)");
+
+    while (!calibrationComplete)
+    {
+      checkPumpInputs();
+    }
+
     return proceed;
   }
 
@@ -256,12 +271,36 @@ byte batteryIcon[8] = {
   }
 }
 
+bool checkPumpInputs()
+{
+  if (digitalRead(TOGGLESWITCH) == HIGH)
+  {
+    runPump();
+  }
+  else if (digitalRead(TOGGLESWITCH) == LOW)
+  {
+    stopPump();
+  }
+
+  if (digitalRead(TRIGGER) == HIGH)
+  {
+    runPump();
+  }
+  else if (digitalRead(TRIGGER) == LOW)
+  {
+    stopPump();
+  }
+
+  return false;
+}
+
 void runPump()
 {
   if (pumpRunning == false)
   {
     displayPumpRunning();
     pumpRunning = true;
+    dashboardDisplayed = false;
   }
 
   digitalWrite(STEPPER_STEP, HIGH);
@@ -281,10 +320,7 @@ void displayPumpRunning()
 
 void stopPump()
 {
-  if (pumpRunning)
-  {
-    pumpRunning = false;
-  }
+  pumpRunning = false;
 }
 
 int getRPM()
@@ -314,18 +350,32 @@ int getRPM()
     step_delay_microseconds = 500;
   }
 
+  void showDashboard()
+  {
+    if (!dashboardDisplayed)
+    {
+      nav.idleOn(idle);
+      dashboardDisplayed = true;
+    }
+  }
+
   void loop() {
     nav.poll();
 
-    if (digitalRead(TOGGLESWITCH) == LOW)
+    if (!checkPumpInputs())
     {
-      // runPump();
+      showDashboard();
     }
-    else if (digitalRead(TOGGLESWITCH) == HIGH)
-    {
-      pumpRunning = false;
-      nav.idleOn(idle);
-    }
+
+    // if (digitalRead(TOGGLESWITCH) == LOW)
+    // {
+    //   // runPump();
+    // }
+    // else if (digitalRead(TOGGLESWITCH) == HIGH)
+    // {
+    //   pumpRunning = false;
+    //   nav.idleOn(idle);
+    // }
   }
 
 #endif
