@@ -14,7 +14,7 @@
 
   // globals
   #define STEPPER_STEP 5
-  #define STEPPER_DIR 9
+  #define STEPPER_DIR 6
 
   // Digital pins D2 - D7
   #define ROT_CLK 2 // rotary encoder clock
@@ -24,8 +24,8 @@
   #define LCD_SDA 22
   #define LCD_SDL 21
 
-  #define TOGGLESWITCH 8
-  #define TRIGGER 9
+  #define TOGGLESWITCH 7
+  #define TRIGGER 8
 
   #define STEPS 200
 
@@ -239,27 +239,26 @@ result doCalibration(eventMask e, prompt &item) {
   }
 }
 
+// enter pump loop on toggle/trigger input
+// we use the interrupt to stop the pump
 bool checkPumpInputs()
 {
   if (digitalRead(TOGGLESWITCH) == HIGH)
   {
     runPump();
   }
-  else if (digitalRead(TOGGLESWITCH) == LOW)
-  {
-    stopPump();
-  }
 
   if (digitalRead(TRIGGER) == HIGH)
   {
     runPump();
   }
-  else if (digitalRead(TRIGGER) == LOW)
-  {
-    stopPump();
-  }
 
   return false;
+}
+
+void stopPumpISR() // ISR for stopping the pump
+{
+  stopPump();
 }
 
 void runPump()
@@ -269,13 +268,22 @@ void runPump()
     displayPumpRunning();
     pumpRunning = true;
     dashboardDisplayed = false;
+    attachInterrupt(digitalPinToInterrupt(TOGGLESWITCH), stopPumpISR, CHANGE); // attach interrupt to TOGGLESWITCH pin
+    attachInterrupt(digitalPinToInterrupt(TRIGGER), stopPumpISR, CHANGE); // attach interrupt to TRIGGER pin
+
   }
 
+  while (pumpRunning)
+  {
+    pumpStep();
+  }
+}
+
+void pumpStep()
+{
   digitalWrite(STEPPER_STEP, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH);
   delayMicroseconds(step_delay_microseconds);
   digitalWrite(STEPPER_STEP, LOW);
-  digitalWrite(LED_BUILTIN, LOW);
   delayMicroseconds(step_delay_microseconds);
 }
 
@@ -288,7 +296,13 @@ void displayPumpRunning()
 
 void stopPump()
 {
-  pumpRunning = false;
+  if (pumpRunning)
+  {
+    pumpRunning = false;
+    dashboardDisplayed = true;
+    detachInterrupt(digitalPinToInterrupt(TOGGLESWITCH)); // detach the interrupt when not needed
+    detachInterrupt(digitalPinToInterrupt(TRIGGER)); // detach the interrupt when not needed
+  }
 }
 
 int getRPM()
