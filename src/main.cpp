@@ -17,12 +17,12 @@ Encoder encoder(2, 3);
 #define ROT_SW 4  // rotary encoder switch (press in)
 
 // pump input bindings
-#define TOGGLE 8
-#define TRIGGER 9
+#define TOGGLE 7
+#define TRIGGER 8
 
 // stepper motor bindings
 #define STEPPER_STEP 5
-#define STEPPER_DIR 9
+#define STEPPER_DIR 6
 
 // lcd bindings
 #define LCD_SDA 22
@@ -58,11 +58,10 @@ void debugMode()
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("T:");
-    // lcd.print(digitalRead(TOGGLE));
-    lcd.print(digitalRead(10));
+    lcd.print(digitalRead(TOGGLE));
     lcd.setCursor(9, 0);
     lcd.print("Tr:");
-    lcd.print(analogRead(TRIGGER));
+    lcd.print(digitalRead(TRIGGER));
 
     lcd.setCursor(0, 1);
     lcd.print("RC:");
