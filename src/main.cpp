@@ -1,10 +1,3 @@
-/*
- Basic Menu
-
- https://lcdmenu.forntoh.dev/examples/basic
-
-*/
-
 #include <LcdMenu.h>
 #include <utils/commandProccesors.h>
 #include <Encoder.h>
@@ -42,13 +35,12 @@ LiquidCrystal_I2C lcd(0x27, 2, 16);
 #define ENTER 53  // NUMPAD 5
 #define BACK 55   // NUMPAD 7
 
-// Initialize the main menu items
 MAIN_MENU(
     ITEM_BASIC("Injector Mode"),
     ITEM_BASIC("Calibrate"),
     ITEM_BASIC("Pump Speed")
 );
-// Construct the LcdMenu
+
 LcdMenu menu(LCD_ROWS, LCD_COLS);
 
 void debugMode()
@@ -104,12 +96,10 @@ void setup() {
     lcd.init();
     lcd.backlight();
 
-    // Initialize LcdMenu with the menu items
     menu.setupLcdWithMenu(0x27, mainMenu);
 }
 
 void loop() {
-    // if rot_clk is held for 5 seconds, enter debug mode
     checkDebugInput();
 
     if (!Serial.available()) return;
