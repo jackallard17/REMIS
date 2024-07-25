@@ -28,6 +28,8 @@ Encoder encoder(2, 3);
 #define LCD_SDA 22
 #define LCD_SDL 21
 
+LiquidCrystal_I2C lcd(0x27, 2, 16);
+
 #define STEPS 200
 
 // menu bindings
@@ -49,13 +51,68 @@ MAIN_MENU(
 // Construct the LcdMenu
 LcdMenu menu(LCD_ROWS, LCD_COLS);
 
+void debugMode()
+{
+  while(true)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    // lcd.print(digitalRead(TOGGLE));
+    lcd.print(digitalRead(10));
+    lcd.setCursor(9, 0);
+    lcd.print("Tr:");
+    lcd.print(analogRead(TRIGGER));
+
+    lcd.setCursor(0, 1);
+    lcd.print("RC:");
+    lcd.print(digitalRead(ROT_CLK));
+    lcd.print(digitalRead(ROT_DT));
+    lcd.print(digitalRead(ROT_SW));
+    lcd.setCursor(9, 1);
+    lcd.print("RP:");
+    lcd.print(encoder.read());
+
+    delay(100);
+  }
+
+}
+
+void checkDebugInput()
+{
+   // if the rotary encoder button is held for 5 seconds, enter debug mode
+  if (digitalRead(ROT_SW) == LOW)
+  {
+    int i = 0;
+    while (i < 500)
+    {
+      if (digitalRead(ROT_SW) == HIGH)
+      {
+        break;
+      }
+      delay(10);
+      i++;
+    }
+    if (i == 500)
+    {
+      debugMode();
+    }
+  }
+}
+
 void setup() {
     Serial.begin(9600);
+    lcd.init();
+    lcd.backlight();
+
     // Initialize LcdMenu with the menu items
     menu.setupLcdWithMenu(0x27, mainMenu);
 }
 
 void loop() {
+    // if rot_clk is held for 5 seconds, enter debug mode
+    checkDebugInput();
+
     if (!Serial.available()) return;
     char command = Serial.read();
 
