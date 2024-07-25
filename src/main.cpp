@@ -38,6 +38,7 @@ long step_delay_microseconds;
 float ml_per_rev = 200;
 
 Stepper stepper(STEPS, STEPPER_DIR, STEPPER_STEP);
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 
 // persistent properties, stored between power cycles
 float frequency;  // frequency of the pump in Hz
@@ -75,5 +76,5 @@ void loop() {
   lcd.setCursor(0, 0);
   lcd.print("REMIS       v0.5");
   lcd.setCursor(0, 12);
-  drawMushrooms();
+  //drawMushrooms();
 }
