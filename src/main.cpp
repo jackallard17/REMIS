@@ -1,6 +1,7 @@
 #include <LcdMenu.h>
 #include <utils/commandProccesors.h>
 #include <Encoder.h>
+#include <EZButton.h>
 
 Encoder encoder(2, 3);
 
@@ -10,7 +11,7 @@ Encoder encoder(2, 3);
 #define ROT_SW 4  // rotary encoder switch (press in)
 
 // pump input bindings
-#define TOGGLE 7
+//#define TOGGLE 7
 #define TRIGGER 8
 
 // stepper motor bindings
