@@ -1,12 +1,11 @@
 #include <LcdMenu.h>
-#include <utils/commandProccesors.h>
 #include <Encoder.h>
 #include <ezButton.h>
 
 #include <Pins.h>
 #include <Menu/Menu.h>
 
-REMISMenu menu;
+REMISMenu remisMenu;
 
 ezButton toggle(TOGGLE);
 ezButton trigger(TRIGGER);
@@ -16,6 +15,6 @@ void setup() {
 }
 
 void loop() {
-    menu.checkDebugInput();
-    menu.pollRotaryInput();
+    remisMenu.checkDebugInput();
+    remisMenu.pollRotaryInput();
 }

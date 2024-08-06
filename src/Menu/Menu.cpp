@@ -9,20 +9,18 @@ Encoder encoder(2, 3);
 LiquidCrystal_I2C lcd(0x27, 2, 16);
 LcdMenu menu(LCD_ROWS, LCD_COLS);
 
+MAIN_MENU(
+    ITEM_BASIC("Injector Mode"),
+    ITEM_BASIC("Calibrate"),
+    ITEM_BASIC("Pump Speed"));
+
 REMISMenu::REMISMenu()
 {
-    MAIN_MENU(
-        ITEM_BASIC("Injector Mode"),
-        ITEM_BASIC("Calibrate"),
-        ITEM_BASIC("Pump Speed")
-        );
-
     lcd.init();
     lcd.backlight();
 
     menu.setupLcdWithMenu(0x27, mainMenu);
 }
-
 
 void REMISMenu::pollRotaryInput()
 {
