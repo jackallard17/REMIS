@@ -1,7 +1,7 @@
 #include <LcdMenu.h>
 #include <utils/commandProccesors.h>
 #include <Encoder.h>
-#include <EZButton.h>
+#include <ezButton.h>
 
 #include <Pins.h>
 #include <PumpController/PumpController.h>
@@ -9,6 +9,8 @@
 Encoder encoder(2, 3);
 
 LiquidCrystal_I2C lcd(0x27, 2, 16);
+
+ezButton toggle(TOGGLE);
 
 MAIN_MENU(
     ITEM_BASIC("Injector Mode"),
