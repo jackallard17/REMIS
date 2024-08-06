@@ -4,7 +4,8 @@
 #include <ezButton.h>
 
 #include <Pins.h>
-#include <PumpController/PumpController.h>
+
+int prevEncoderValue = 0;
 
 Encoder encoder(2, 3);
 
@@ -67,6 +68,31 @@ void checkDebugInput()
       debugMode();
     }
   }
+}
+
+void translateRotaryToMenuCommand()
+{
+  if (ROT_SW == LOW)
+  {
+    menu.enter();
+  }
+
+  int value = encoder.read();
+
+  if (value > prevEncoderValue)
+  {
+    menu.up();
+  }
+  else if (value < prevEncoderValue)
+  {
+    menu.down();
+  }
+  else
+  {
+    return;
+  }
+
+  prevEncoderValue = value;
 }
 
 void setup() {
