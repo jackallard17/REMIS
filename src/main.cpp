@@ -11,6 +11,7 @@ Encoder encoder(2, 3);
 LiquidCrystal_I2C lcd(0x27, 2, 16);
 
 ezButton toggle(TOGGLE);
+ezButton trigger(TRIGGER);
 
 MAIN_MENU(
     ITEM_BASIC("Injector Mode"),
