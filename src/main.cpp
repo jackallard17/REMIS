@@ -5,7 +5,7 @@
 #include <Pins.h>
 #include <Menu/Menu.h>
 
-REMISMenu remisMenu;
+REMISMenu* remisMenu = new REMISMenu();
 
 ezButton toggle(TOGGLE);
 ezButton trigger(TRIGGER);
@@ -15,6 +15,7 @@ void setup() {
 }
 
 void loop() {
-    remisMenu.checkDebugInput();
-    remisMenu.pollRotaryInput();
+    remisMenu->checkDebugInput();
+    remisMenu->pollRotaryInput();
+    Serial.println("Hello World");
 }
