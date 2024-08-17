@@ -1,73 +1,87 @@
-/*
- Basic Menu
-
- https://lcdmenu.forntoh.dev/examples/basic
-
-*/
-
 #include <LcdMenu.h>
 #include <utils/commandProccesors.h>
 #include <Encoder.h>
+#include <ezButton.h>
+#include <LiquidCrystal_I2C.h>
+
+//#include <./Pump/Pump.h>
+#include <Pins.h>
+
+int prevEncoderValue = 0;
 
 Encoder encoder(2, 3);
 
-// rotary encoder bindings
-#define ROT_CLK 2 // rotary encoder clock
-#define ROT_DT 3  // rotary encoder direction
-#define ROT_SW 4  // rotary encoder switch (press in)
-
-// pump input bindings
-#define TOGGLE 8
-#define TRIGGER 9
-
-// stepper motor bindings
-#define STEPPER_STEP 5
-#define STEPPER_DIR 9
-
-// lcd bindings
-#define LCD_SDA 22
-#define LCD_SDL 21
-
 LiquidCrystal_I2C lcd(0x27, 2, 16);
 
-#define STEPS 200
+ezButton toggle(TOGGLE, INPUT_PULLUP);
+ezButton trigger(TRIGGER, INPUT_PULLUP);
 
-// menu bindings
-#define LCD_ROWS 2
-#define LCD_COLS 16
+float frequency = 1100; // frequency of the pump in Hz
+float period = 1.0 / frequency; // period of the pump in seconds
+long step_delay_microseconds = (period / 2) * 1000000;
 
-// Configure keyboard keys (ASCII)
-#define UP 56     // NUMPAD 8
-#define DOWN 50   // NUMPAD 2
-#define ENTER 53  // NUMPAD 5
-#define BACK 55   // NUMPAD 7
-
-// Initialize the main menu items
 MAIN_MENU(
     ITEM_BASIC("Injector Mode"),
     ITEM_BASIC("Calibrate"),
-    ITEM_BASIC("Pump Speed")
-);
-// Construct the LcdMenu
+    ITEM_BASIC("Pump Speed"));
+
 LcdMenu menu(LCD_ROWS, LCD_COLS);
+
+int8_t mushroom[8] = {
+    0b00000,
+    0b00100,
+    0b01110,
+    0b11111,
+    0b00100,
+    0b00100,
+    0b00100,
+    0b00100
+};
+
+byte batteryIcon[8] = {
+  B00100,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B00000
+};
+
+void drawMushrooms()
+{
+  lcd.setCursor(0, 1);
+  for (int i = 0; i < 16; i++)
+  {
+    lcd.write((byte)0);
+    delay(100);
+  }
+}
 
 void debugMode()
 {
-  while(true)
+  while (true)
   {
+    toggle.loop();
+
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("T:");
-    // lcd.print(digitalRead(TOGGLE));
-    lcd.print(digitalRead(10));
+    lcd.print(digitalRead(TOGGLE));
+    lcd.print(toggle.getState());
     lcd.setCursor(9, 0);
     lcd.print("Tr:");
-    lcd.print(analogRead(TRIGGER));
+    lcd.print(digitalRead(TRIGGER));
+    lcd.print(digitalRead(6));
+    lcd.print(digitalRead(9));
+    lcd.print(digitalRead(10));
+    lcd.print(trigger.getState());
 
     lcd.setCursor(0, 1);
     lcd.print("RC:");
     lcd.print(digitalRead(ROT_CLK));
-    lcd.print(digitalRead(ROT_DT));
+    // lcd.print(digitalRead(ROT_DT));
     lcd.print(digitalRead(ROT_SW));
     lcd.setCursor(9, 1);
     lcd.print("RP:");
@@ -75,12 +89,11 @@ void debugMode()
 
     delay(100);
   }
-
 }
 
 void checkDebugInput()
 {
-   // if the rotary encoder button is held for 5 seconds, enter debug mode
+  // if the rotary encoder button is held for 5 seconds, enter debug mode
   if (digitalRead(ROT_SW) == LOW)
   {
     int i = 0;
@@ -100,21 +113,86 @@ void checkDebugInput()
   }
 }
 
-void setup() {
-    Serial.begin(9600);
-    lcd.init();
-    lcd.backlight();
+void pollRotaryInput()
+{
+  if (ROT_SW == LOW)
+  {
+    menu.enter();
+  }
 
-    // Initialize LcdMenu with the menu items
-    menu.setupLcdWithMenu(0x27, mainMenu);
+  int value = encoder.read();
+  Serial.println(value);
+
+  if (value > prevEncoderValue)
+  {
+    menu.up();
+  }
+  else if (value < prevEncoderValue)
+  {
+    menu.down();
+  }
+  else
+  {
+    return;
+  }
+
+  prevEncoderValue = value;
 }
 
-void loop() {
-    // if rot_clk is held for 5 seconds, enter debug mode
-    checkDebugInput();
+void step()
+{
+  digitalWrite(STEPPER_STEP, HIGH);
+  delayMicroseconds(step_delay_microseconds);
+  digitalWrite(STEPPER_STEP, LOW);
+  delayMicroseconds(step_delay_microseconds);
+}
 
-    if (!Serial.available()) return;
-    char command = Serial.read();
+void runPump()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Pump Running...");
+  lcd.setCursor(0, 1);
+  lcd.print(frequency);
+  lcd.print(" RPM");
 
-    processMenuCommand(menu, command, UP, DOWN, ENTER, BACK);
+  while (toggle.isPressed())
+  {
+    step();
+  }
+}
+
+void setup()
+{
+  Serial.begin(9600);
+
+  // LCD init and startup message
+  lcd.init();
+  lcd.backlight();
+  //lcd.createChar(0, mushroom);
+  //lcd.createChar(1, batteryIcon);
+  lcd.setCursor(0, 0);
+  lcd.print("REMIS       v0.0");
+  lcd.setCursor(0, 12);
+  drawMushrooms();
+
+  menu.setupLcdWithMenu(0x27, mainMenu);
+
+  pinMode(TOGGLE, INPUT);
+  pinMode(TRIGGER, INPUT);
+
+  toggle.setDebounceTime(50);
+  trigger.setDebounceTime(50);
+}
+
+void loop()
+{
+  checkDebugInput();
+
+  if (encoder.read() != prevEncoderValue)
+  {
+    delay(150);
+    pollRotaryInput();
+  }
+
 }

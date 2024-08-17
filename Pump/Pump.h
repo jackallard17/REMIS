@@ -21,8 +21,10 @@ private:
     volatile int last_CLK_state = LOW;
     volatile int last_DT_state = LOW;
 
+    LiquidCrystal_I2C lcd;
+
     void updateFrequency();
-    void runPump();
+    void step();
 
 public:
     void setup();
