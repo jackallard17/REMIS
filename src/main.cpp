@@ -108,13 +108,7 @@ void loop() {
     checkDebugInput();
 
     if (encoder.read() != prevEncoderValue){
-      delay(100);
+      delay(150);
       pollRotaryInput();
     }
-    pollRotaryInput();
-
-    if (!Serial.available()) return;
-    char command = Serial.read();
-
-    //processMenuCommand(menu, command, UP, DOWN, ENTER, BACK);
 }
