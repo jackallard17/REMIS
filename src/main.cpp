@@ -70,7 +70,7 @@ void checkDebugInput()
   }
 }
 
-void translateRotaryToMenuCommand()
+void pollRotaryInput()
 {
   if (ROT_SW == LOW)
   {
@@ -78,6 +78,7 @@ void translateRotaryToMenuCommand()
   }
 
   int value = encoder.read();
+  Serial.println(value);
 
   if (value > prevEncoderValue)
   {
@@ -109,5 +110,6 @@ void loop() {
     if (!Serial.available()) return;
     char command = Serial.read();
 
-    processMenuCommand(menu, command, UP, DOWN, ENTER, BACK);
+    //processMenuCommand(menu, command, UP, DOWN, ENTER, BACK);
+    pollRotaryInput();
 }
