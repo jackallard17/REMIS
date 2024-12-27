@@ -1,6 +1,9 @@
 # REMIS
 Source code for the Remarkably Efficient Mass Inoculation System (REMIS) by Fungaia, a peristaltic pump/injector system designed for large-scale mushroom cultivation via liquid culture.
 
+## Micropython Rewrite
+As of Jan 2025, this project is being migrated to micropython running on a raspberry pi pico board. More updates soon to come!
+
 ## Installation
 1. Clone this repo
 2. Install the dependencies
