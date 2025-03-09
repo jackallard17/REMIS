@@ -4,11 +4,6 @@ Source code for the Remarkably Efficient Mass Inoculation System (REMIS) by Fung
 ## Micropython Rewrite
 As of Jan 2025, this project is being migrated to micropython running on a raspberry pi pico board. More updates soon to come!
 
-## Installation
-1. Clone this repo
-2. Install the dependencies
-3. Upload the sketch to the Arduino nano board, either using the Arduino IDE or the command line interface (CLI)
-
 ## I/O
 
 This code is designed to run on an Arduino Nano board, connected to the following inputs:
